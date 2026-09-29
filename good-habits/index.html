@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chinna Pillala Manchi Alavatlu - Good Habits Animation</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+Telugu+2:wght@500;750;800&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Baloo Telugu 2', 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #fef08a 0%, #bae6fd 50%, #fbcfe8 100%);
+      min-height: 100vh;
+    }
+    .float-anim {
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    .bounce-click:active {
+      transform: scale(0.95);
+    }
+    .star-pop {
+      animation: pop 0.5s ease-out forwards;
+    }
+    @keyframes pop {
+      0% { transform: scale(0); opacity: 0; }
+      70% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body class="text-slate-800 flex flex-col items-center justify-between p-4 md:p-8">
+
+  <header class="w-full max-w-4xl text-center mb-6">
+    <div class="inline-block bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-300 px-8 py-3.5 rounded-3xl shadow-xl mb-4 border-4 border-amber-400 transform hover:scale-105 transition-all">
+      <span class="text-indigo-900 font-black text-base md:text-xl tracking-wide uppercase drop-shadow">
+        <i class="fa-solid fa-school text-rose-600 mr-2 animate-bounce"></i> 
+        Children's Garden E.M HIGH SCHOOL 
+        <i class="fa-solid fa-school text-rose-600 ml-2 animate-bounce"></i>
+      </span>
+    </div>
+    <div class="inline-block bg-white/85 backdrop-blur px-6 py-2 rounded-full shadow-md mb-2 border border-yellow-200 block">
+      <span class="text-amber-500 font-bold text-lg"><i class="fa-solid fa-star text-yellow-400"></i> Super Kids Club <i class="fa-solid fa-star text-yellow-400"></i></span>
+    </div>
+    <h1 class="text-4xl md:text-5xl font-extrabold text-purple-700 drop-shadow-sm">
+      మా మంచి అలవాట్లు (Good Habits) 🌟
+    </h1>
+    <p class="text-lg md:text-xl text-slate-600 mt-1">
+      ప్రతిరోజూ ఈ మంచి పనులు చేసి సూపర్ హీరో అవ్వండి!
+    </p>
+  </header>
+
+  <main class="w-full max-w-4xl grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    
+    <!-- Character / Mascot Box -->
+    <div class="bg-white/90 backdrop-blur rounded-3xl p-6 shadow-xl border-4 border-indigo-200 flex flex-col items-center justify-center text-center relative overflow-hidden">
+      <div class="absolute top-3 left-3 bg-indigo-100 text-indigo-700 font-bold px-3 py-1 rounded-full text-sm">
+        Score: <span id="score-val">0</span> ⭐
+      </div>
+      <div class="w-32 h-32 bg-yellow-100 rounded-full flex items-center justify-center text-6xl shadow-inner mt-4 mb-4 float-anim" id="mascot-avatar">
+        🧒
+      </div>
+      <h2 id="mascot-speech" class="text-xl font-bold text-indigo-900 mb-2">
+        "నాతో పాటు మంచి అలవాట్లు నేర్చుకుందాం!"
+      </h2>
+      <p class="text-sm text-slate-500">కింద ఉన్న అలవాట్లపై క్లిక్ చేసి పాయింట్లు సంపాదించండి.</p>
+    </div>
+
+    <!-- Habit Cards Container -->
+    <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+      
+      <!-- Habit 1: Early Morning -->
+      <div onclick="completeHabit('early', this)" class="habit-card bg-white hover:bg-emerald-50 transition-all cursor-pointer rounded-2xl p-5 shadow-lg border-2 border-emerald-200 flex items-center gap-4 bounce-click">
+        <div class="w-14 h-14 bg-emerald-100 rounded-2xl flex items-center justify-center text-3xl text-emerald-600 flex-shrink-0">
+          🌅
+        </div>
+        <div>
+          <h3 class="font-bold text-lg text-slate-800">ఉదయాన్నే లేవడం</h3>
+          <p class="text-sm text-slate-500">సూర్యోదయానికి ముందే లేచి బ్రష్ చేయడం.</p>
+        </div>
+        <div class="ml-auto text-2xl check-icon opacity-20">✅</div>
+      </div>
+
+      <!-- Habit 2: Brushing Teeth -->
+      <div onclick="completeHabit('brush', this)" class="habit-card bg-white hover:bg-sky-50 transition-all cursor-pointer rounded-2xl p-5 shadow-lg border-2 border-sky-200 flex items-center gap-4 bounce-click">
+        <div class="w-14 h-14 bg-sky-100 rounded-2xl flex items-center justify-center text-3xl text-sky-600 flex-shrink-0">
+          🦷
+        </div>
+        <div>
+          <h3 class="font-bold text-lg text-slate-800">దంతాల శుభ్రత</h3>
+          <p class="text-sm text-slate-500">రోజుకు రెండుసార్లు బ్రష్ చేయడం.</p>
+        </div>
+        <div class="ml-auto text-2xl check-icon opacity-20">✅</div>
+      </div>
+
+      <!-- Habit 3: Healthy Food -->
+      <div onclick="completeHabit('food', this)" class="habit-card bg-white hover:bg-orange-50 transition-all cursor-pointer rounded-2xl p-5 shadow-lg border-2 border-orange-200 flex items-center gap-4 bounce-click">
+        <div class="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center text-3xl text-orange-600 flex-shrink-0">
+          🍎
+        </div>
+        <div>
+          <h3 class="font-bold text-lg text-slate-800">పండ్లు, కూరగాయలు</h3>
+          <p class="text-sm text-slate-500">జంక్ ఫుడ్ మానేసి ఆరోగ్యకరమైన ఆహారం తిను.</p>
+        </div>
+        <div class="ml-auto text-2xl check-icon opacity-20">✅</div>
+      </div>
+
+      <!-- Habit 4: Washing Hands -->
+      <div onclick="completeHabit('hands', this)" class="habit-card bg-white hover:bg-purple-50 transition-all cursor-pointer rounded-2xl p-5 shadow-lg border-2 border-purple-200 flex items-center gap-4 bounce-click">
+        <div class="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center text-3xl text-purple-600 flex-shrink-0">
+          🧼
+        </div>
+        <div>
+          <h3 class="font-bold text-lg text-slate-800">చేతులు కడుక్కోవడం</h3>
+          <p class="text-sm text-slate-500">భోజనానికి ముందు చేతులు సబ్బుతో కడుగు.</p>
+        </div>
+        <div class="ml-auto text-2xl check-icon opacity-20">✅</div>
+      </div>
+
+      <!-- Habit 5: Reading Books -->
+      <div onclick="completeHabit('study', this)" class="habit-card bg-white hover:bg-pink-50 transition-all cursor-pointer rounded-2xl p-5 shadow-lg border-2 border-pink-200 flex items-center gap-4 bounce-click">
+        <div class="w-14 h-14 bg-pink-100 rounded-2xl flex items-center justify-center text-3xl text-pink-600 flex-shrink-0">
+          📚
+        </div>
+        <div>
+          <h3 class="font-bold text-lg text-slate-800">రోజూ చదవడం</h3>
+          <p class="text-sm text-slate-500">ప్రతిరోజూ కొంత సమయం శ్రద్ధగా చదువు.</p>
+        </div>
+        <div class="ml-auto text-2xl check-icon opacity-20">✅</div>
+      </div>
+
+      <!-- Habit 6: Helping Parents -->
+      <div onclick="completeHabit('help', this)" class="habit-card bg-white hover:bg-rose-50 transition-all cursor-pointer rounded-2xl p-5 shadow-lg border-2 border-rose-200 flex items-center gap-4 bounce-click">
+        <div class="w-14 h-14 bg-rose-100 rounded-2xl flex items-center justify-center text-3xl text-rose-600 flex-shrink-0">
+          🤝
+        </div>
+        <div>
+          <h3 class="font-bold text-lg text-slate-800">పెద్దలకు సహాయం</h3>
+          <p class="text-sm text-slate-500">అమ్మానాన్నలకు చిన్న చిన్న పనుల్లో సాయం చేయి.</p>
+        </div>
+        <div class="ml-auto text-2xl check-icon opacity-20">✅</div>
+      </div>
+
+      <!-- Habit 7: No Mobile / Social Media -->
+      <div onclick="completeHabit('nomobile', this)" class="habit-card bg-white hover:bg-cyan-50 transition-all cursor-pointer rounded-2xl p-5 shadow-lg border-2 border-cyan-200 flex items-center gap-4 bounce-click">
+        <div class="w-14 h-14 bg-cyan-100 rounded-2xl flex items-center justify-center text-3xl text-cyan-600 flex-shrink-0">
+          📵
+        </div>
+        <div>
+          <h3 class="font-bold text-lg text-slate-800">ఫోన్‌లకు దూరంగా...</h3>
+          <p class="text-sm text-slate-500">మొబైల్ ఫోన్లు, సోషల్ మీడియాకు దూరంగా ఉండు.</p>
+        </div>
+        <div class="ml-auto text-2xl check-icon opacity-20">✅</div>
+      </div>
+
+      <!-- Habit 8: Clean Surroundings -->
+      <div onclick="completeHabit('clean', this)" class="habit-card bg-white hover:bg-lime-50 transition-all cursor-pointer rounded-2xl p-5 shadow-lg border-2 border-lime-200 flex items-center gap-4 bounce-click">
+        <div class="w-14 h-14 bg-lime-100 rounded-2xl flex items-center justify-center text-3xl text-lime-600 flex-shrink-0">
+          🧹
+        </div>
+        <div>
+          <h3 class="font-bold text-lg text-slate-800">పరిసరాల శుభ్రత</h3>
+          <p class="text-sm text-slate-500">చెత్తను బుట్టలోనే వేసి చుట్టూ శుభ్రంగా ఉంచు.</p>
+        </div>
+        <div class="ml-auto text-2xl check-icon opacity-20">✅</div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="w-full max-w-4xl bg-white/90 backdrop-blur rounded-2xl p-4 shadow-lg border border-slate-200 text-center flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div class="text-slate-600 font-semibold text-sm">
+      💡 చిట్కా: అన్ని అలవాట్లు పూర్తి చేసి స్టార్స్ గెలుచుకోండి!
+    </div>
+    <button onclick="resetHabits()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-2 rounded-xl shadow transition-all bounce-click">
+      <i class="fa-solid fa-rotate-right mr-2"></i> మళ్ళీ మొదలుపెట్టు
+    </button>
+  </footer>
+
+  <!-- Celebration Modal / Banner -->
+  <div id="celebration-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-2xl border-4 border-yellow-400 star-pop">
+      <div class="text-6xl mb-4">🏆🎉</div>
+      <h2 class="text-3xl font-extrabold text-purple-700 mb-2">అద్భుతం!</h2>
+      <p class="text-slate-600 mb-6">మీరు అన్ని మంచి అలవాట్లు పూర్తి చేసి సూపర్ స్టార్ అయిపోయారు!</p>
+      <button onclick="closeModal()" class="bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-900 font-extrabold px-8 py-3 rounded-2xl shadow-lg hover:scale-105 transition-all">
+        సూపర్! 🌟
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let score = 0;
+    const completed = {
+      early: false,
+      brush: false,
+      food: false,
+      hands: false,
+      study: false,
+      help: false,
+      nomobile: false,
+      clean: false
+    };
+
+    const speeches = [
+      "బాగా చేస్తున్నారు! ఇలాగే కొనసాగించండి!",
+      "సూపర్ హీరోలా మారుతున్నారు!",
+      "మంచి అలవాట్లే నిజమైన సంపద!",
+      "వెరీ గుడ్! మరో అలవాటు పూర్తి చేయండి!"
+    ];
+
+    function completeHabit(id, element) {
+      if (completed[id]) return;
+      
+      completed[id] = true;
+      score += 10;
+      document.getElementById('score-val').innerText = score;
+      
+      // Visual updates
+      element.classList.remove('bg-white');
+      element.classList.add('bg-emerald-100', 'border-emerald-500');
+      element.querySelector('.check-icon').style.opacity = '1';
+      
+      // Mascot speech update
+      const randomSpeech = speeches[Math.floor(Math.random() * speeches.length)];
+      document.getElementById('mascot-speech').innerText = `"${randomSpeech}"`;
+      document.getElementById('mascot-avatar').innerHTML = '⭐';
+      
+      setTimeout(() => {
+        document.getElementById('mascot-avatar').innerHTML = '🧒';
+      }, 1000);
+
+      // Check if all completed
+      if (Object.values(completed).every(val => val === true)) {
+        setTimeout(() => {
+          document.getElementById('celebration-modal').style.display = 'flex';
+        }, 500);
+      }
+    }
+
+    function closeModal() {
+      document.getElementById('celebration-modal').style.display = 'none';
+    }
+
+    function resetHabits() {
+      score = 0;
+      document.getElementById('score-val').innerText = score;
+      for (let key in completed) {
+        completed[key] = false;
+      }
+      document.querySelectorAll('.habit-card').forEach(card => {
+        card.className = "habit-card bg-white hover:bg-emerald-50 transition-all cursor-pointer rounded-2xl p-5 shadow-lg border-2 border-emerald-200 flex items-center gap-4 bounce-click";
+        card.querySelector('.check-icon').style.opacity = '0.2';
+      });
+      document.getElementById('mascot-speech').innerText = `"మళ్ళీ మొదలుపెట్టాం! అన్ని పూర్తి చేద్దాం!"`;
+    }
+  </script>
+
+</body>
+</html>
+```
