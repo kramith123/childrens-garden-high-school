@@ -202,8 +202,25 @@ let shapePracticeRunId='', shapePracticeSaving=false;
 let shapeTestRows=[], shapeTestAnswers=[], shapeTestSubmitting=false;
 
 async function loadShapeSheetQuestions(section){
-  const data=await apiCall({action:'getQuestions',sessionId:currentSessionId,chapterNo:1,section:section});
-  return Array.isArray(data.questions)?data.questions:[];
+
+  const sectionMap = {
+    learn: 'Learn',
+    examples: 'Example',
+    practice: 'Practice',
+    test: 'Test'
+  };
+
+  const sheetSection =
+    sectionMap[String(section || '').trim().toLowerCase()] || section;
+
+  const data = await apiCall({
+    action: 'getQuestions',
+    sessionId: currentSessionId,
+    chapterNo: Number(activeChapterNo),
+    section: sheetSection
+  });
+
+  return Array.isArray(data.questions) ? data.questions : [];
 }
 function safeImageUrl(value){
   const raw=String(value||'').trim();if(!raw)return '';
