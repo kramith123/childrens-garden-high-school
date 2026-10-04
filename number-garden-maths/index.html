@@ -153,7 +153,17 @@ async function loadShapeSheetQuestions(section){
 }
 function safeImageUrl(value){
   const raw=String(value||'').trim();if(!raw)return '';
-  try{const u=new URL(raw,window.location.href);return (u.protocol==='https:'||u.protocol==='http:')?u.href:'';}catch(_){return ''}
+  // Convert common Google Drive sharing URLs into a direct image URL.
+  let fileId='';
+  const driveMatch=raw.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i);
+  const openMatch=raw.match(/[?&]id=([a-zA-Z0-9_-]+)/i);
+  if(driveMatch)fileId=driveMatch[1];
+  else if(openMatch&&/drive\.google\.com/i.test(raw))fileId=openMatch[1];
+  if(fileId)return 'https://drive.google.com/uc?export=view&id='+encodeURIComponent(fileId);
+  try{
+    const u=new URL(raw,window.location.href);
+    return (u.protocol==='https:'||u.protocol==='http:')?u.href:'';
+  }catch(_){return ''}
 }
 function sheetQuestionImage(q){
   const url=safeImageUrl(q.imageUrl);
@@ -191,7 +201,18 @@ function shapeSheetPracticeAnswer(encoded){
   const answer=decodeURIComponent(encoded),q=shapeSheetRows.practice[shapeSheetIndex],fb=document.getElementById('shapeFeedback');
   if(answer.trim().toLowerCase()===String(q.correctAnswer||'').trim().toLowerCase()){
     shapeSheetScore++;shapeSheetIndex++;shapeSheetAttempts=0;fb.textContent='Correct! 🌟';fb.style.color='#23845b';setTimeout(shapeSheetPracticeView,350);
-  }else{shapeSheetAttempts++;fb.textContent=shapeSheetAttempts===1?'Good try! Look carefully and try once more.':'Not quite. Think about the shape and try again.';fb.style.color='#b45309';}
+  }else{
+    shapeSheetAttempts++;
+    fb.innerHTML=shapeSheetAttempts===1
+      ? '❌ Incorrect answer. Please try again.'
+      : '❌ Still incorrect. Look carefully at the shape and try once more.';
+    fb.style.color='#b42318';
+    fb.style.background='#fff1f0';
+    fb.style.border='1px solid #f4b4ae';
+    fb.style.borderRadius='10px';
+    fb.style.padding='10px';
+    fb.setAttribute('role','alert');
+  }
 }
 async function shapeGo(mode){
   shapeMode=mode;document.querySelectorAll('.step').forEach(b=>b.classList.toggle('active',b.dataset.step===mode));
@@ -225,7 +246,7 @@ function shapeTestView(){
   const el=document.getElementById('content');
   if(shapeTestIndex>=shapeTestRows.length){submitShapeSheetTest();return;}
   const q=shapeTestRows[shapeTestIndex],opts=[q.optionA,q.optionB,q.optionC].filter(Boolean);
-  el.innerHTML=`<h2>🏆 Chapter Test</h2><p class="hint">Choose one answer. No hints will be shown during the test.</p><div class="question"><p class="smallnote">Question ${shapeTestIndex+1} of ${shapeTestRows.length}</p>${sheetQuestionImage(q)}<div class="sum" style="font-size:clamp(22px,5vw,34px)">${escapeHtml(q.question)}</div><div class="choices">${opts.map(o=>`<button class="choice" onclick="shapeTestAnswer('${encodeURIComponent(o)}')">${escapeHtml(o)}</button>`).join('')}</div></div>`;
+  el.innerHTML=`<h2>🏆 Chapter Test</h2><p class="hint">Choose one answer. Your answers will be checked after you finish the test.</p><div class="question"><p class="smallnote">Question ${shapeTestIndex+1} of ${shapeTestRows.length}</p>${sheetQuestionImage(q)}<div class="sum" style="font-size:clamp(22px,5vw,34px)">${escapeHtml(q.question)}</div><div class="choices">${opts.map(o=>`<button class="choice" onclick="shapeTestAnswer('${encodeURIComponent(o)}')">${escapeHtml(o)}</button>`).join('')}</div></div>`;
 }
 function shapeTestAnswer(encoded){
   if(shapeTestSubmitting)return;
@@ -239,7 +260,7 @@ async function submitShapeSheetTest(){
   try{
     const result=await apiCall({action:'submitQuestionTest',sessionId:currentSessionId,chapterNo:1,answers:shapeTestAnswers,timeTaken:durationText(elapsed)});
     const review=Array.isArray(result.review)?result.review:[];
-    el.innerHTML=`<h2>🏆 Chapter Test Completed!</h2><div class="lesson"><div class="sum">${result.correctAnswers} / ${result.totalQuestions}</div><p>Correct: ${result.correctAnswers} &nbsp; Wrong: ${result.wrongAnswers}</p><p>Time Taken: ${durationText(elapsed)}</p><p class="hint">Result saved successfully to Maths Tracking.</p></div><h3>Question-wise Review</h3><div class="workgrid">${review.map((r,i)=>`<div class="workcard"><small>Question ${i+1} · ${r.isCorrect?'Correct':'Wrong'}</small><b>${escapeHtml(r.question)}</b><p>Your Answer: <b>${escapeHtml(r.studentAnswer||'Not answered')}</b></p><p>Correct Answer: <b>${escapeHtml(r.correctAnswer)}</b></p><p class="hint">${escapeHtml(r.explanation||'')}</p></div>`).join('')}</div><div class="actions"><button class="btn primary" onclick="backToChapters()">Back to Chapters</button></div>`;
+    el.innerHTML=`<h2>🏆 Chapter Test Completed!</h2><div class="lesson"><div class="sum">${result.correctAnswers} / ${result.totalQuestions}</div><p>Correct: ${result.correctAnswers} &nbsp; Wrong: ${result.wrongAnswers}</p><p>Time Taken: ${durationText(elapsed)}</p><p class="hint">Result saved successfully to Maths Tracking.</p></div><h3>Question-wise Results – Correct &amp; Wrong Answers</h3><div class="workgrid">${review.map((r,i)=>`<div class="workcard"><small>Question ${i+1} · ${r.isCorrect?'Correct':'Wrong'}</small><b>${escapeHtml(r.question)}</b><p>Your Answer: <b>${escapeHtml(r.studentAnswer||'Not answered')}</b></p><p>Correct Answer: <b>${escapeHtml(r.correctAnswer)}</b></p><p class="hint">${escapeHtml(r.explanation||'')}</p></div>`).join('')}</div><div class="actions"><button class="btn primary" onclick="backToChapters()">Back to Chapters</button></div>`;
   }catch(err){
     shapeTestSubmitting=false;
     el.innerHTML=`<h2>Test Result Could Not Be Saved</h2><div class="lesson"><p>${escapeHtml(err.message)}</p><p class="hint">Your answers are still held on this screen. Please retry.</p></div><div class="actions"><button class="btn primary" onclick="submitShapeSheetTest()">Retry Submit</button></div>`;
@@ -326,7 +347,11 @@ function done(s){saved.add(k(s));localStorage.setItem(progressKey(),JSON.stringi
 function setTopic(t){if(activeClock){writePending();pauseClock()}topic=t;modeIndex=0;modeScore=0;testIndex=0;testScore=0;document.querySelectorAll('.topic').forEach(b=>b.classList.toggle('active',b.dataset.topic===t));go('learn')}
 document.querySelectorAll('.topic').forEach(b=>b.onclick=()=>setTopic(b.dataset.topic));
 function go(s){if(activeChapterNo===1){shapeGo(s);return}if(activeClock&&((activeClock.mode==='practice'&&s!=='practice')||(activeClock.mode==='test'&&s!=='test'))){writePending();pauseClock()}if(currentSessionId){finishTrackedActivity();const labels={learn:'Learn',examples:'Examples',practice:'Practice',test:'Chapter Test'};startTrackedActivity('Addition - '+labels[s],s==='learn'||s==='examples'?'Learning':s==='practice'?'Practice':'Assessment')}document.querySelectorAll('.step').forEach(b=>b.classList.toggle('active',b.dataset.step===s));({learn,examples,practice,test}[s])()}
-document.querySelectorAll('.step').forEach(b=>b.onclick=()=>go(b.dataset.step));
+document.querySelectorAll('.step').forEach(b=>b.onclick=()=>{
+  const step=b.dataset.step;
+  if(activeChapterNo===1) shapeGo(step);
+  else go(step);
+});
 function banner(){let [bg,fg]=themes[topic];return `<div class="topicbanner" style="background:${bg};color:${fg}">${names[topic]}</div>`}
 function pictureGroup(a,b){return `<div class="picture-groups"><div class="picture-set">${'🍊 '.repeat(a)}<small>Group 1: ${a}</small></div><b class="plus">+</b><div class="picture-set">${'🍊 '.repeat(b)}<small>Group 2: ${b}</small></div></div>`}
 function columnSum(a,b){return `<table><tr><th></th><th class="place">Tens</th><th class="place">Ones</th></tr><tr><th>First</th><td>${Math.floor(a/10)}</td><td>${a%10}</td></tr><tr><th>Second</th><td>${Math.floor(b/10)}</td><td>${b%10}</td></tr><tr><th>Total</th><td>${Math.floor((a+b)/10)}</td><td>${(a+b)%10}</td></tr></table>`}
