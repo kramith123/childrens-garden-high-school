@@ -88,7 +88,7 @@ async function openChapter(chapterNo){
     const access=await apiCall({action:'checkChapterAccess',sessionId:currentSessionId,chapterNo});
     if(!access.allowed){msg.textContent=access.message||'This chapter is locked.';return;}
     if(chapterNo!==1 && chapterNo!==2 && chapterNo!==6){
-      msg.textContent='This chapter is unlocked, but its learning content is still being prepared.';
+      msg.textContent='DEBUG: chapterNo = '+chapterNo+' | Type = '+typeof chapterNo;
       return;
     }
     activeChapterNo=chapterNo;
