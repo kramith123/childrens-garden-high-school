@@ -81,6 +81,7 @@ function escapeHtml(value){
 }
 async function openChapter(chapterNo){
     chapterNo = Number(chapterNo);
+    document.getElementById('chapterMessage').textContent='DEBUG: Clicked Chapter = '+chapterNo;
   const msg=document.getElementById('chapterMessage');
   msg.textContent='Checking chapter access...';
   try{
