@@ -289,7 +289,7 @@ async function shapeSheetPracticeAnswer(encoded){
   if(fb){fb.textContent='Saving your answer...';fb.style.color='#315b82';}
   try{
     await apiCall({
-      action:'logPracticeQuestionAttempt',sessionId:currentSessionId,chapterNo:1,
+      action:'logPracticeQuestionAttempt',sessionId:currentSessionId,chapterNo:Number(activeChapterNo),
       questionId:q.questionId,questionNo:shapeSheetIndex+1,answer:answer,
       attemptNo:attemptNo,attemptId:'NG-PA-'+currentSessionId+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),
       practiceRunId:shapePracticeRunId
@@ -504,7 +504,7 @@ async function submitShapeSheetTest(){
   const elapsed=pauseClock(),el=document.getElementById('content');
   el.innerHTML='<h2>Checking your answers...</h2><p class="hint">Please wait while your test is evaluated.</p>';
   try{
-    const result=await apiCall({action:'submitQuestionTest',sessionId:currentSessionId,chapterNo:1,answers:shapeTestAnswers,timeTaken:durationText(elapsed)});
+    const result=await apiCall({action:'submitQuestionTest',sessionId:currentSessionId,chapterNo:Number(activeChapterNo),answers:shapeTestAnswers,timeTaken:durationText(elapsed)});
     const review=Array.isArray(result.review)?result.review:[];
     el.innerHTML=`<h2>🏆 Chapter Test Completed!</h2><div class="lesson"><div class="sum">${result.correctAnswers} / ${result.totalQuestions}</div><p>Correct: ${result.correctAnswers} &nbsp; Wrong: ${result.wrongAnswers}</p><p>Time Taken: ${durationText(elapsed)}</p><p class="hint">Result saved successfully to Maths Tracking.</p></div><h3>Question-wise Results – Correct &amp; Wrong Answers</h3><div class="workgrid">${review.map((r,i)=>`<div class="workcard"><small>Question ${i+1} · ${r.isCorrect?'Correct':'Wrong'}</small><b>${escapeHtml(r.question)}</b><p>Your Answer: <b>${escapeHtml(r.studentAnswer||'Not answered')}</b></p><p>Correct Answer: <b>${escapeHtml(r.correctAnswer)}</b></p><p class="hint">${escapeHtml(r.explanation||'')}</p></div>`).join('')}</div><div class="actions"><button class="btn primary" onclick="backToChapters()">Back to Chapters</button></div>`;
   }catch(err){
