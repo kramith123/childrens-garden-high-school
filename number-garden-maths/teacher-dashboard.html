@@ -80,6 +80,7 @@ function escapeHtml(value){
   return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 async function openChapter(chapterNo){
+    chapterNo = Number(chapterNo);
   const msg=document.getElementById('chapterMessage');
   msg.textContent='Checking chapter access...';
   try{
