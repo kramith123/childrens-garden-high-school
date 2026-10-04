@@ -314,31 +314,178 @@ async function shapeSheetPracticeAnswer(encoded){
   }
 }
 async function shapeGo(mode){
-  shapeMode=mode;document.querySelectorAll('.step').forEach(b=>b.classList.toggle('active',b.dataset.step===mode));
-  if(activeClock&&((activeClock.mode==='practice'&&mode!=='practice')||(activeClock.mode==='test'&&mode!=='test')))pauseClock();
-  if(mode==='learn'||mode==='examples'||mode==='practice'){
-    finishTrackedActivity();const labels={learn:'Learn',examples:'Examples',practice:'Practice'};
-    startTrackedActivity('Chapter 1 - Explore the Shapes - '+labels[mode],mode==='practice'?'Practice':'Learning');
-    document.getElementById('content').innerHTML='<p class="hint">Loading questions from your teacher...</p>';
-    try{
-      const rows=await loadShapeSheetQuestions(mode);shapeSheetRows[mode]=rows;
-      if(mode==='learn'){if(rows.length)shapeSheetLearnView(rows);else shapeLearn();}
-      else if(mode==='examples'){if(rows.length)shapeSheetExamplesView(rows);else shapeExamplesView();}
-      else{
-        if(!rows.length){questionBankMessage('No Practice Questions','No ACTIVE Practice questions were returned for Class 1, Chapter 1. The app will not substitute the old built-in 20 questions.');return;}
-        shapeSheetIndex=0;shapeSheetScore=0;shapeSheetAttempts=0;shapePracticeSaving=false;shapePracticeRunId='NG-PRACTICE-'+currentSessionId+'-'+Date.now();beginClock('practice',0);shapeSheetPracticeView();
-      }
-    }catch(err){questionBankMessage('Question Bank Connection Error',err.message||'Unable to load questions.');}
+
+  shapeMode=mode;
+
+  const chapterNo=Number(activeChapterNo);
+  const chapterTitle=chapterNo===1
+    ? 'Explore the Shapes'
+    : chapterNo===2
+    ? 'Fun with Numbers'
+    : 'The Art of Addition';
+
+  document.querySelectorAll('.step').forEach(b=>
+    b.classList.toggle('active',b.dataset.step===mode)
+  );
+
+  if(activeClock&&(
+    (activeClock.mode==='practice'&&mode!=='practice')||
+    (activeClock.mode==='test'&&mode!=='test')
+  )) pauseClock();
+
+  // Chapter 2 - Learning
+  if(mode==='learn' && chapterNo===2){
+
+    finishTrackedActivity();
+
+    startTrackedActivity(
+      'Chapter 2 - Fun with Numbers - Learn',
+      'Learning'
+    );
+
+    chapter2LearnView();
     return;
   }
-  if(mode==='test'){
-    finishTrackedActivity();startTrackedActivity('Chapter 1 - Explore the Shapes - Chapter Test','Assessment');
-    document.getElementById('content').innerHTML='<p class="hint">Loading Chapter Test questions...</p>';
+
+  // Learn, Examples and Practice
+  if(mode==='learn'||mode==='examples'||mode==='practice'){
+
+    finishTrackedActivity();
+
+    const labels={
+      learn:'Learn',
+      examples:'Examples',
+      practice:'Practice'
+    };
+
+    startTrackedActivity(
+      'Chapter '+chapterNo+' - '+chapterTitle+' - '+labels[mode],
+      mode==='practice'?'Practice':'Learning'
+    );
+
+    document.getElementById('content').innerHTML=
+      '<p class="hint">Loading questions from your teacher...</p>';
+
     try{
+
+      const rows=await loadShapeSheetQuestions(mode);
+      shapeSheetRows[mode]=rows;
+
+      if(mode==='learn'){
+
+        if(rows.length){
+          shapeSheetLearnView(rows);
+        }
+        else if(chapterNo===1){
+          shapeLearn();
+        }
+        else{
+          questionBankMessage(
+            'No Learning Content',
+            'Learning content for Chapter 2 is being prepared.'
+          );
+        }
+
+      }
+
+      else if(mode==='examples'){
+
+        if(rows.length){
+          shapeSheetExamplesView(rows);
+        }
+        else if(chapterNo===1){
+          shapeExamplesView();
+        }
+        else{
+          questionBankMessage(
+            'No Examples Found',
+            'No ACTIVE Example questions were found for Class '+
+            currentStudent.className+', Chapter '+chapterNo+
+            '. Please check the Question Bank sheet.'
+          );
+        }
+
+      }
+
+      else{
+
+        if(!rows.length){
+          questionBankMessage(
+            'No Practice Questions',
+            'No ACTIVE Practice questions were returned for Class '+
+            currentStudent.className+', Chapter '+chapterNo+'.'
+          );
+          return;
+        }
+
+        shapeSheetIndex=0;
+        shapeSheetScore=0;
+        shapeSheetAttempts=0;
+        shapePracticeSaving=false;
+
+        shapePracticeRunId=
+          'NG-PRACTICE-'+currentSessionId+'-'+Date.now();
+
+        beginClock('practice',0);
+        shapeSheetPracticeView();
+
+      }
+
+    }catch(err){
+
+      questionBankMessage(
+        'Question Bank Connection Error',
+        err.message||'Unable to load questions.'
+      );
+
+    }
+
+    return;
+  }
+
+  // Chapter Test
+  if(mode==='test'){
+
+    finishTrackedActivity();
+
+    startTrackedActivity(
+      'Chapter '+chapterNo+' - '+chapterTitle+' - Chapter Test',
+      'Assessment'
+    );
+
+    document.getElementById('content').innerHTML=
+      '<p class="hint">Loading Chapter Test questions...</p>';
+
+    try{
+
       shapeTestRows=await loadShapeSheetQuestions('Test');
-      if(!shapeTestRows.length){questionBankMessage('No Test Questions','No ACTIVE Test questions were found. Copy the existing Triangle question into a new row and change Section to Test.');return;}
-      shapeTestAnswers=[];shapeTestIndex=0;shapeTestSubmitting=false;beginClock('test',0);shapeTestView();
-    }catch(err){questionBankMessage('Question Bank Connection Error',err.message||'Unable to load Test questions.');}
+
+      if(!shapeTestRows.length){
+
+        questionBankMessage(
+          'No Test Questions',
+          'No ACTIVE Test questions were found for Class '+
+          currentStudent.className+', Chapter '+chapterNo+'.'
+        );
+
+        return;
+      }
+
+      shapeTestAnswers=[];
+      shapeTestIndex=0;
+      shapeTestSubmitting=false;
+
+      beginClock('test',0);
+      shapeTestView();
+
+    }catch(err){
+
+      questionBankMessage(
+        'Question Bank Connection Error',
+        err.message||'Unable to load questions.'
+      );
+
+    }
   }
 }
 function shapeTestView(){
