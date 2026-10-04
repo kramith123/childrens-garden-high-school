@@ -289,12 +289,12 @@ function shapePracticeAnswer(encoded){
  if(answer===q[2]){shapePracticeScore++;shapePracticeIndex++;shapeAttempts=0;fb.textContent='Correct! 🌟';fb.style.color='#23845b';setTimeout(shapePracticeView,350);}
  else{shapeAttempts++;fb.textContent=shapeAttempts===1?'Good try! Look carefully and try once more.':'Not quite. Think about the shape and try again.';fb.style.color='#b45309';}
 }
-function legacyShapeTestView(){
+function shapeTestView(){
  const el=document.getElementById('content');
  if(shapeTestIndex>=10){const elapsed=pauseClock();const score=shapeTestScore;const maths={level:'Class 1',topic:'Explore the Shapes - Chapter Test',totalQuestions:10,correctAnswers:score,wrongAnswers:10-score,marks:score,timeTaken:durationText(elapsed)};el.innerHTML=`<h2>🏆 Chapter Test Completed!</h2><div class="lesson"><div class="sum">${score} / 10</div><p>Your Chapter 1 score</p><p id="mathsSaveStatus" class="hint">Saving your result...</p><button id="retryMathsSave" class="btn secondary" style="display:none" onclick="retryLatestMathsResult()">Retry Saving Result</button></div><div class="actions"><button class="btn primary" onclick="backToChapters()">Back to Chapters</button></div>`;saveFinishedMathsResult(score+'/10',maths);return;}
  const q=shapeQuestions[(shapeTestIndex*2)%shapeQuestions.length];el.innerHTML=`<h2>🏆 Chapter Test</h2><p class="hint">Choose one answer. No hints will be shown during the test.</p><div class="question"><p class="smallnote">Question ${shapeTestIndex+1} of 10</p><div class="sum">${q[0]}</div><div class="choices">${q[1].map(o=>`<button class="choice" onclick="shapeTestAnswer('${encodeURIComponent(o)}')">${o}</button>`).join('')}</div></div>`;
 }
-function legacyShapeTestAnswer(encoded){const answer=decodeURIComponent(encoded),q=shapeQuestions[(shapeTestIndex*2)%shapeQuestions.length];if(answer===q[2])shapeTestScore++;shapeTestIndex++;shapeTestView();}
+function shapeTestAnswer(encoded){const answer=decodeURIComponent(encoded),q=shapeQuestions[(shapeTestIndex*2)%shapeQuestions.length];if(answer===q[2])shapeTestScore++;shapeTestIndex++;shapeTestView();}
 
 function backToChapters(){
   if(activeClock){writePending();pauseClock();}
@@ -394,5 +394,4 @@ document.querySelectorAll('.choice').forEach(btn=>btn.onclick=()=>{document.quer
 }
 updateProgress();
 </script></body></html>
-
 
