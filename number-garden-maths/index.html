@@ -79,34 +79,87 @@ function renderChapterList(){
 function escapeHtml(value){
   return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+
 async function openChapter(chapterNo){
+  chapterNo = Number(chapterNo);
+
   const msg=document.getElementById('chapterMessage');
   msg.textContent='Checking chapter access...';
+
   try{
-    const access=await apiCall({action:'checkChapterAccess',sessionId:currentSessionId,chapterNo});
-    if(!access.allowed){msg.textContent=access.message||'This chapter is locked.';return;}
-    if(chapterNo!==1 && chapterNo!==6){
+    const access=await apiCall({
+      action:'checkChapterAccess',
+      sessionId:currentSessionId,
+      chapterNo
+    });
+
+    if(!access.allowed){
+      msg.textContent=access.message||'This chapter is locked.';
+      return;
+    }
+
+    // Allow Chapters 1, 2 and 6
+    if(chapterNo!==1 && chapterNo!==2 && chapterNo!==6){
       msg.textContent='This chapter is unlocked, but its learning content is still being prepared.';
       return;
     }
+
     activeChapterNo=chapterNo;
+
     document.getElementById('chapterBrowser').style.display='none';
     document.getElementById('learningArea').style.display='block';
-    document.getElementById('studentClassPill').textContent='CLASS '+currentStudent.className+' · CHAPTER '+chapterNo;
-    document.getElementById('chapterIntro').textContent=chapterNo===1?'Discover flat shapes, solid shapes and shapes around us.':'Learn addition with pictures, number blocks, stories and fun challenges.';
-    if(chapterNo===1){
+
+    document.getElementById('studentClassPill').textContent=
+      'CLASS '+currentStudent.className+' · CHAPTER '+chapterNo;
+
+    document.getElementById('chapterIntro').textContent=
+      chapterNo===1
+      ? 'Discover flat shapes, solid shapes and shapes around us.'
+      : chapterNo===2
+      ? 'Explore numbers, number patterns and skip counting.'
+      : 'Learn addition with pictures, number blocks, stories and fun challenges.';
+
+    // Chapter 1 and Chapter 2
+    if(chapterNo===1 || chapterNo===2){
+
       document.querySelector('.topics').style.display='none';
-      document.getElementById('progressTitle').textContent='Explore the Shapes';
-      startTrackedActivity('Chapter 1 - Explore the Shapes - Learn','Learning');
+
+      document.getElementById('progressTitle').textContent=
+        chapterNo===1?'Explore the Shapes':'Fun with Numbers';
+
+      if(chapterNo===1){
+        startTrackedActivity(
+          'Chapter 1 - Explore the Shapes - Learn',
+          'Learning'
+        );
+      }
+
       shapeGo('learn');
+
     } else {
+
+      // Chapter 6 - Addition
       document.querySelector('.topics').style.display='grid';
-      document.getElementById('progressTitle').textContent='Your learning journey';
+
+      document.getElementById('progressTitle').textContent=
+        'Your learning journey';
+
       const pending=readPending();
-      if(pending&&bank[pending.topic]&&bank[pending.topic][pending.mode]) pendingScreen(pending);
-      else {startTrackedActivity('Chapter 6 - The Art of Addition - Learn','Learning');go('learn');}
+
+      if(pending&&bank[pending.topic]&&bank[pending.topic][pending.mode]){
+        pendingScreen(pending);
+      } else {
+        startTrackedActivity(
+          'Chapter 6 - The Art of Addition - Learn',
+          'Learning'
+        );
+        go('learn');
+      }
     }
-  }catch(e){msg.textContent=e.message;}
+
+  }catch(e){
+    msg.textContent=e.message;
+  }
 }
 
 const shapeExamples=[
