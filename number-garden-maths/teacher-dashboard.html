@@ -87,15 +87,28 @@ async function openChapter(chapterNo){
   try{
     const access=await apiCall({action:'checkChapterAccess',sessionId:currentSessionId,chapterNo});
     if(!access.allowed){msg.textContent=access.message||'This chapter is locked.';return;}
-    if(chapterNo!==1 && chapterNo!==2 && chapterNo!==6){
-      msg.textContent='DEBUG: chapterNo = '+chapterNo+' | Type = '+typeof chapterNo;
+    
+    // 1 nunchi 14 varaku allow chese condition
+    if(chapterNo < 1 || chapterNo > 14){
+      msg.textContent='Invalid chapter number: '+chapterNo;
       return;
     }
+    
     activeChapterNo=chapterNo;
     document.getElementById('chapterBrowser').style.display='none';
     document.getElementById('learningArea').style.display='block';
     document.getElementById('studentClassPill').textContent='CLASS '+currentStudent.className+' · CHAPTER '+chapterNo;
-    document.getElementById('chapterIntro').textContent=chapterNo===1?'Discover flat shapes, solid shapes and shapes around us.':chapterNo===2?'Explore numbers, number patterns and skip counting.':'Learn addition with pictures, number blocks, stories and fun challenges.';
+    
+    // Chapter intro text dynamic ga set avvadaniki
+    if(chapterNo===1){
+      document.getElementById('chapterIntro').textContent='Discover flat shapes, solid shapes and shapes around us.';
+    } else if(chapterNo===2){
+      document.getElementById('chapterIntro').textContent='Explore numbers, number patterns and skip counting.';
+    } else {
+      document.getElementById('chapterIntro').textContent='Explore Chapter '+chapterNo+' learning content and interactive exercises.';
+    }
+
+    // Chapter 1 & 2 ki separate layouts, 3 nunchi 14 varaku Question Bank flow (Chapter 6 laage)
     if(chapterNo===1 || chapterNo===2){
       document.querySelector('.topics').style.display='none';
       document.getElementById('progressTitle').textContent=chapterNo===1?'Explore the Shapes':'Fun with Numbers';
@@ -105,7 +118,7 @@ async function openChapter(chapterNo){
       document.getElementById('progressTitle').textContent='Your learning journey';
       const pending=readPending();
       if(pending&&bank[pending.topic]&&bank[pending.topic][pending.mode]) pendingScreen(pending);
-      else {startTrackedActivity('Chapter 6 - The Art of Addition - Learn','Learning');go('learn');}
+      else {startTrackedActivity('Chapter '+chapterNo+' - Learn','Learning');go('learn');}
     }
   }catch(e){msg.textContent=e.message;}
 }
