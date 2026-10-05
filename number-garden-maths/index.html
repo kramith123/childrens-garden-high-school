@@ -555,8 +555,48 @@ function backToChapters(){
   document.getElementById('studentClassPill').textContent='CLASS '+currentStudent.className+' · MATHS';
   loadChapterList();
 }
-async function studentLogin(){const input=document.getElementById('loginIdInput'),btn=document.getElementById('loginBtn'),err=document.getElementById('loginError');const loginId=input.value.trim();err.textContent='';if(!loginId){err.textContent='Please enter your Login ID.';return}btn.disabled=true;btn.textContent='Checking...';try{const data=await apiCall({action:'login',loginId,appId:'NG',source:'Number Garden Maths'});currentStudent=data;currentSessionId=data.sessionId;saved.clear();JSON.parse(localStorage.getItem(progressKey())||'[]').forEach(x=>saved.add(x));updateProgress();document.getElementById('studentWelcome').textContent='Welcome, '+data.studentName+'!';document.getElementById('studentClassPill').textContent='CLASS '+data.className+' · MATHS';document.getElementById('loginGate').style.display='none';document.getElementById('mathsApp').style.display='block';await loadChapterList();}catch(e){err.textContent=e.message}finally{btn.disabled=false;btn.textContent='Login & Start Maths →'}}
-document.getElementById('loginBtn').addEventListener('click',studentLogin);document.getElementById('loginIdInput').addEventListener('keydown',e=>{if(e.key==='Enter')studentLogin()});
+async function studentLogin(){
+  const input = document.getElementById('loginIdInput');
+  const btn = document.getElementById('loginBtn');
+  const err = document.getElementById('loginError');
+  const loginId = input.value.trim();
+  err.textContent = '';
+  
+  if(!loginId){
+    err.textContent = 'Please enter your Login ID.';
+    return;
+  }
+  
+  btn.disabled = true;
+  btn.textContent = 'Checking...';
+  
+  try{
+    const data = await apiCall({action:'login', loginId, appId:'NG', source:'Number Garden Maths'});
+    currentStudent = data;
+    currentSessionId = data.sessionId;
+    saved.clear();
+    
+    JSON.parse(localStorage.getItem(progressKey()) || '[]').forEach(x => saved.add(x));
+    updateProgress();
+    
+    document.getElementById('studentWelcome').textContent = 'Welcome, ' + data.studentName + '!';
+    document.getElementById('studentClassPill').textContent = 'CLASS ' + data.className + ' · MATHS';
+    document.getElementById('loginGate').style.display = 'none';
+    document.getElementById('mathsApp').style.display = 'block';
+    
+    await loadChapterList();
+  }catch(e){
+    err.textContent = e.message;
+  }finally{
+    btn.disabled = false;
+    btn.textContent = 'Login & Start Maths →';
+  }
+}
+
+document.getElementById('loginBtn').addEventListener('click', studentLogin);
+document.getElementById('loginIdInput').addEventListener('keydown', e => {
+  if(e.key === 'Enter') studentLogin();
+});
 async function startTrackedActivity(name,type){if(!currentSessionId)return;try{if(currentActivityId){await apiCall({action:'completeActivity',activityId:currentActivityId,completed:true})}}catch(e){}try{const r=await apiCall({action:'startActivity',sessionId:currentSessionId,activity:name,type});currentActivityId=r.activityId;currentActivityName=name}catch(e){console.warn('Activity tracking:',e.message)}}
 function finishTrackedActivity(extra={}){if(!currentActivityId)return Promise.resolve(null);const id=currentActivityId;currentActivityId='';return apiCall({action:'completeActivity',activityId:id,completed:true,...extra}).catch(e=>{console.warn('Activity tracking:',e.message);return {error:e.message}})}
 function mathsResultStorageKey(resultId){return 'ng_pending_math_result_'+resultId}
