@@ -47,7 +47,12 @@ let currentStudent=null, currentSessionId='', currentActivityId='', currentActiv
 function apiCall(params){return new Promise((resolve,reject)=>{const cb='ngcb_'+Date.now()+'_'+Math.random().toString(36).slice(2);const script=document.createElement('script');const timer=setTimeout(()=>{cleanup();reject(new Error('Connection timed out. Please try again.'));},15000);function cleanup(){clearTimeout(timer);delete window[cb];script.remove()}window[cb]=(res)=>{cleanup();if(res&&res.success)resolve(res.data||{});else reject(new Error(res&&res.error||'Unable to connect. Please try again.'))};script.onerror=()=>{cleanup();reject(new Error('Could not connect to the school server.'))};const query={...params};['maths','answers'].forEach(k=>{if(query[k]&&typeof query[k]==='object')query[k]=JSON.stringify(query[k])});script.src=CENTRAL_API+'?'+new URLSearchParams({...query,callback:cb,_:Date.now()}).toString();document.body.appendChild(script)})}
 
 let availableChapters=[];
-let activeChapterNo=6, shapePracticeIndex=0, shapePracticeScore=0, shapeTestIndex=0, shapeTestScore=0, shapeAttempts=0;
+let activeChapterNo=6, activeChapterName='';
+let shapePracticeIndex=0, shapePracticeScore=0, shapeTestIndex=0, shapeTestScore=0, shapeAttempts=0;
+
+function currentChapterTitle(){
+  return activeChapterName || (activeChapterNo === 1 ? 'Explore the Shapes' : activeChapterNo === 2 ? 'Fun with Numbers' : ('Chapter ' + activeChapterNo));
+}
 async function loadChapterList(){
   document.getElementById('chapterBrowser').style.display='block';
   document.getElementById('learningArea').style.display='none';
@@ -105,6 +110,7 @@ async function openChapter(chapterNo){
     }
 
     activeChapterNo=chapterNo;
+    activeChapterName = access.chapterName || ('Chapter ' + chapterNo);
 
     document.getElementById('chapterBrowser').style.display='none';
     document.getElementById('learningArea').style.display='block';
@@ -117,33 +123,24 @@ async function openChapter(chapterNo){
       document.getElementById('chapterIntro').textContent='Discover flat shapes, solid shapes and shapes around us.';
     } else if(chapterNo===2){
       document.getElementById('chapterIntro').textContent='Explore numbers, number patterns and skip counting.';
-    } else if(chapterNo===3){
-      document.getElementById('chapterIntro').textContent='Explore number names, fruit codes and fun counting puzzles.';
     } else {
-      document.getElementById('chapterIntro').textContent='Explore Chapter '+chapterNo+' learning content and interactive exercises.';
+      document.getElementById('chapterIntro').textContent='Explore ' + activeChapterName + ' learning content and interactive exercises.';
     }
 
     // Chapter 1, 2, AND 3 ki Question Bank flow (shapeGo) allow cheyyali
-    if(chapterNo===1 || chapterNo===2 || chapterNo===3){
+    if(chapterNo >= 1 && chapterNo <= 14){
 
       document.querySelector('.topics').style.display='none';
-
-      if(chapterNo===1){
-        document.getElementById('progressTitle').textContent='Explore the Shapes';
-      } else if(chapterNo===2){
-        document.getElementById('progressTitle').textContent='Fun with Numbers';
-      } else if(chapterNo===3){
-        document.getElementById('progressTitle').textContent='Number Names';
-      }
+      document.getElementById('progressTitle').textContent = activeChapterName;
 
       if(chapterNo===1){
         startTrackedActivity(
           'Chapter 1 - Explore the Shapes - Learn',
           'Learning'
         );
-      } else if(chapterNo===3){
+      } else {
         startTrackedActivity(
-          'Chapter 3 - Number Names - Learn',
+          'Chapter ' + chapterNo + ' - ' + activeChapterName + ' - Learn',
           'Learning'
         );
       }
@@ -281,18 +278,20 @@ function shapeSheetLearnView(rows){
 }
 function shapeSheetExamplesView(rows){
   const el=document.getElementById('content');
-  el.innerHTML=`<h2>🍎 Shape Examples</h2><p class="hint">Read each example and remember the shape.</p><div class="workgrid">${rows.map((q,i)=>sheetQuestionCard(q,i,'Example')).join('')}</div><div class="actions"><button class="btn secondary" onclick="shapeGo('learn')">← Learn</button><button class="btn primary" onclick="shapeGo('practice')">Start Practice →</button></div>`;
+  const title = currentChapterTitle();
+  el.innerHTML=`<h2>🍎 ${escapeHtml(title)} – Examples</h2><p class="hint">Read each example carefully.</p><div class="workgrid">${rows.map((q,i)=>sheetQuestionCard(q,i,'Example')).join('')}</div><div class="actions"><button class="btn secondary" onclick="shapeGo('learn')">← Learn</button><button class="btn primary" onclick="shapeGo('practice')">Start Practice →</button></div>`;
 }
 function shapeSheetPracticeView(){
   const rows=shapeSheetRows.practice,el=document.getElementById('content');
+  const title = currentChapterTitle();
   if(shapeSheetIndex>=rows.length){
     const elapsed=pauseClock(),score=shapeSheetScore,total=rows.length;
-    const maths={level:'Class 1',topic:'Explore the Shapes - Question Bank Practice',totalQuestions:total,correctAnswers:score,wrongAnswers:total-score,marks:score,timeTaken:durationText(elapsed)};
-    el.innerHTML=`<h2>🌟 Practice Completed!</h2><div class="lesson"><div class="sum">${score} / ${total}</div><p>Correct answers. Keep exploring shapes!</p><p id="mathsSaveStatus" class="hint">Saving your result...</p><button id="retryMathsSave" class="btn secondary" style="display:none" onclick="retryLatestMathsResult()">Retry Saving Result</button></div><div class="actions"><button class="btn secondary" onclick="shapeGo('practice')">Practise Again</button><button class="btn primary" onclick="shapeGo('test')">Go to Chapter Test →</button></div>`;
+    const maths={level:'Class 1',topic:title+' - Question Bank Practice',totalQuestions:total,correctAnswers:score,wrongAnswers:total-score,marks:score,timeTaken:durationText(elapsed)};
+    el.innerHTML=`<h2>🌟 Practice Completed!</h2><div class="lesson"><div class="sum">${score} / ${total}</div><p>Correct answers. Keep learning and growing!</p><p id="mathsSaveStatus" class="hint">Saving your result...</p><button id="retryMathsSave" class="btn secondary" style="display:none" onclick="retryLatestMathsResult()">Retry Saving Result</button></div><div class="actions"><button class="btn secondary" onclick="shapeGo('practice')">Practise Again</button><button class="btn primary" onclick="shapeGo('test')">Go to Chapter Test →</button></div>`;
     saveFinishedMathsResult(score+'/'+total,maths);return;
   }
   const q=rows[shapeSheetIndex],opts=[q.optionA,q.optionB,q.optionC].filter(Boolean);
-  el.innerHTML=`<h2>✏️ Shape Practice</h2><p class="hint">Choose the correct answer. You can try again if needed.</p><div class="question"><p class="smallnote">Question ${shapeSheetIndex+1} of ${rows.length}</p>${sheetQuestionImage(q)}<div class="sum" style="font-size:clamp(22px,5vw,34px)">${escapeHtml(q.question)}</div><div class="choices">${opts.map(o=>`<button class="choice" onclick="shapeSheetPracticeAnswer('${encodeURIComponent(o)}')">${escapeHtml(o)}</button>`).join('')}</div><div id="shapeFeedback" class="feedback"></div></div>`;
+  el.innerHTML=`<h2>✏️ ${escapeHtml(title)} – Practice</h2><p class="hint">Choose the correct answer. You can try again if needed.</p><div class="question"><p class="smallnote">Question ${shapeSheetIndex+1} of ${rows.length}</p>${sheetQuestionImage(q)}<div class="sum" style="font-size:clamp(22px,5vw,34px)">${escapeHtml(q.question)}</div><div class="choices">${opts.map(o=>`<button class="choice" onclick="shapeSheetPracticeAnswer('${encodeURIComponent(o)}')">${escapeHtml(o)}</button>`).join('')}</div><div id="shapeFeedback" class="feedback"></div></div>`;
 }
 async function shapeSheetPracticeAnswer(encoded){
   if(shapePracticeSaving)return;
@@ -332,11 +331,7 @@ async function shapeGo(mode){
   shapeMode=mode;
 
   const chapterNo=Number(activeChapterNo);
-  const chapterTitle=chapterNo===1
-    ? 'Explore the Shapes'
-    : chapterNo===2
-    ? 'Fun with Numbers'
-    : 'The Art of Addition';
+  const chapterTitle=currentChapterTitle();
 
   document.querySelectorAll('.step').forEach(b=>
     b.classList.toggle('active',b.dataset.step===mode)
@@ -396,7 +391,7 @@ async function shapeGo(mode){
         else{
           questionBankMessage(
             'No Learning Content',
-            'Learning content for Chapter 2 is being prepared.'
+            'Learning content for Chapter '+chapterNo+' is being prepared.'
           );
         }
 
@@ -504,9 +499,10 @@ async function shapeGo(mode){
 }
 function shapeTestView(){
   const el=document.getElementById('content');
+  const title = currentChapterTitle();
   if(shapeTestIndex>=shapeTestRows.length){submitShapeSheetTest();return;}
   const q=shapeTestRows[shapeTestIndex],opts=[q.optionA,q.optionB,q.optionC].filter(Boolean);
-  el.innerHTML=`<h2>🏆 Chapter Test</h2><p class="hint">Choose one answer. Your answers will be checked after you finish the test.</p><div class="question"><p class="smallnote">Question ${shapeTestIndex+1} of ${shapeTestRows.length}</p>${sheetQuestionImage(q)}<div class="sum" style="font-size:clamp(22px,5vw,34px)">${escapeHtml(q.question)}</div><div class="choices">${opts.map(o=>`<button class="choice" onclick="shapeTestAnswer('${encodeURIComponent(o)}')">${escapeHtml(o)}</button>`).join('')}</div></div>`;
+  el.innerHTML=`<h2>🏆 ${escapeHtml(title)} – Chapter Test</h2><p class="hint">Choose one answer. Your answers will be checked after you finish the test.</p><div class="question"><p class="smallnote">Question ${shapeTestIndex+1} of ${shapeTestRows.length}</p>${sheetQuestionImage(q)}<div class="sum" style="font-size:clamp(22px,5vw,34px)">${escapeHtml(q.question)}</div><div class="choices">${opts.map(o=>`<button class="choice" onclick="shapeTestAnswer('${encodeURIComponent(o)}')">${escapeHtml(o)}</button>`).join('')}</div></div>`;
 }
 function shapeTestAnswer(encoded){
   if(shapeTestSubmitting)return;
@@ -520,7 +516,7 @@ async function submitShapeSheetTest(){
   try{
     const result=await apiCall({action:'submitQuestionTest',sessionId:currentSessionId,chapterNo:Number(activeChapterNo),answers:shapeTestAnswers,timeTaken:durationText(elapsed)});
     const review=Array.isArray(result.review)?result.review:[];
-    el.innerHTML=`<h2>🏆 Chapter Test Completed!</h2><div class="lesson"><div class="sum">${result.correctAnswers} / ${result.totalQuestions}</div><p>Correct: ${result.correctAnswers} &nbsp; Wrong: ${result.wrongAnswers}</p><p>Time Taken: ${durationText(elapsed)}</p><p class="hint">Result saved successfully to Maths Tracking.</p></div><h3>Question-wise Results – Correct &amp; Wrong Answers</h3><div class="workgrid">${review.map((r,i)=>`<div class="workcard"><small>Question ${i+1} · ${r.isCorrect?'Correct':'Wrong'}</small><b>${escapeHtml(r.question)}</b><p>Your Answer: <b>${escapeHtml(r.studentAnswer||'Not answered')}</b></p><p>Correct Answer: <b>${escapeHtml(r.correctAnswer)}</b></p><p class="hint">${escapeHtml(r.explanation||'')}</p></div>`).join('')}</div><div class="actions"><button class="btn primary" onclick="backToChapters()">Back to Chapters</button></div>`;
+    el.innerHTML=`<h2>🏆 Chapter Test Completed!</h2><div class="lesson"><div class="sum">${result.correctAnswers} / ${result.totalQuestions}</div><p>Correct: ${result.correctAnswers} &nbsp; Wrong: ${result.wrongAnswers}</p><p>Time Taken: ${durationText(elapsed)}</p><p class="hint">Result saved successfully to Maths Tracking.</p></div><h3>Question-wise Results – Correct &amp; Wrong Answers</h3><div class="workgrid">${review.map((r,i)=>`<div class="workcard"><small>Question ${i+1} · ${r.isCorrect?'Correct':'Wrong'}</small><b>${escapeHtml(r.question)}</b><p>Your Answer: <b>${escapeHtml(r.studentAnswer\vert{}\vert{}'Not answered')}</b></p><p>Correct Answer: <b>${escapeHtml(r.correctAnswer)}</b></p><p class="hint">${escapeHtml(r.explanation||'')}</p></div>`).join('')}</div><div class="actions"><button class="btn primary" onclick="backToChapters()">Back to Chapters</button></div>`;
   }catch(err){
     shapeTestSubmitting=false;
     el.innerHTML=`<h2>Test Result Could Not Be Saved</h2><div class="lesson"><p>${escapeHtml(err.message)}</p><p class="hint">Your answers are still held on this screen. Please retry.</p></div><div class="actions"><button class="btn primary" onclick="submitShapeSheetTest()">Retry Submit</button></div>`;
@@ -529,7 +525,7 @@ async function submitShapeSheetTest(){
 function shapeLearn(){
  const el=document.getElementById('content');
  el.innerHTML=`<h2>🌈 Explore the Shapes</h2><p class="hint">Look around you. Shapes are everywhere!</p>
- <div class="lesson"><h3>2D Shapes – Flat Shapes</h3><p class="pictures">🔺　🟦　▭　⚪　🥚　⬟　⬢</p>
+ <div class="lesson"><h3>2D Shapes – Flat Shapes</h3><p class="pictures">🔺 🟦 ▭ ⚪ 🥚 ⬟ ⬢</p>
  <div class="workgrid"><div class="workcard"><b>Triangle</b><p>3 sides · 3 corners</p></div><div class="workcard"><b>Square</b><p>4 equal sides · 4 corners</p></div><div class="workcard"><b>Rectangle</b><p>4 sides · 4 corners</p></div><div class="workcard"><b>Circle</b><p>Round · No corners</p></div><div class="workcard"><b>Oval</b><p>Curved · Egg-shaped</p></div><div class="workcard"><b>Pentagon</b><p>5 sides</p></div><div class="workcard"><b>Hexagon</b><p>6 sides</p></div></div></div>
  <div class="lesson"><h3>3D Shapes – Solid Shapes</h3><div class="workgrid"><div class="workcard"><div class="pictures">🧊</div><b>Cube</b><p>Dice</p></div><div class="workcard"><div class="pictures">📦</div><b>Cuboid</b><p>Brick / Box</p></div><div class="workcard"><div class="pictures">⚽</div><b>Sphere</b><p>Ball / Globe</p></div><div class="workcard"><div class="pictures">🍦</div><b>Cone</b><p>Ice-cream cone / Party hat</p></div><div class="workcard"><div class="pictures">🥫</div><b>Cylinder</b><p>Can / Battery</p></div></div></div>
  <div class="lesson"><h3>Remember</h3><p>Flat shapes are 2D shapes. Solid shapes are 3D shapes. We can find these shapes in objects around us.</p></div>
@@ -653,5 +649,3 @@ document.querySelectorAll('.step[data-step]').forEach(btn=>{
 // Keep the old built-in Chapter 1 test disabled; only active Sheet questions are used.
 updateProgress();
 </script></body></html>
-
-
