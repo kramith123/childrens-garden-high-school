@@ -573,7 +573,6 @@ async function saveFinishedMathsResult(scoreText,maths){const record={sessionId:
 async function retryMathsResult(resultId){const raw=localStorage.getItem(mathsResultStorageKey(resultId));if(!raw)return;const status=document.getElementById('mathsSaveStatus');const retry=document.getElementById('retryMathsSave');if(status)status.textContent='Retrying result save...';try{await sendMathsResultRecord(JSON.parse(raw));if(status)status.textContent='Result saved successfully to Maths Tracking. ✓';if(retry)retry.style.display='none';}catch(e){if(status)status.textContent='Still unable to save: '+e.message;if(retry)retry.style.display='inline-block';}}
 function retryLatestMathsResult(){const keys=Object.keys(localStorage).filter(k=>k.startsWith('ng_pending_math_result_'));if(!keys.length)return;retryMathsResult(keys[keys.length-1].replace('ng_pending_math_result_',''));}
 window.addEventListener('beforeunload',()=>{if(activeClock)writePending();if(currentSessionId){const q=new URLSearchParams({action:'heartbeat',sessionId:currentSessionId,callback:'void'});const img=new Image();img.src=CENTRAL_API+'?'+q.toString()}});
-const el=document.getElementById('content');
 const names={picture:'Picture Addition',twodigit:'2-digit Addition',zero:'Addition with 0',word:'Word Problems'};
 const themes={picture:['#fff2df','#d97720'],twodigit:['#e9f4ff','#2878bd'],zero:['#fff0f6','#d34f83'],word:['#eaf8f0','#29976c']};
 const progressKey=()=> 'ng_colour_add_done_'+(currentStudent?.loginId||'guest');
