@@ -98,9 +98,9 @@ async function openChapter(chapterNo){
       return;
     }
 
-    // Allow Chapters 1, 2 and 6
-    if(chapterNo!==1 && chapterNo!==2 && chapterNo!==6){
-      msg.textContent='This chapter is unlocked, but its learning content is still being prepared.';
+    // 1 nunchi 14 varaku allow chese laaga check marustunnamu
+    if(chapterNo < 1 || chapterNo > 14){
+      msg.textContent='This chapter number is not valid.';
       return;
     }
 
@@ -112,24 +112,38 @@ async function openChapter(chapterNo){
     document.getElementById('studentClassPill').textContent=
       'CLASS '+currentStudent.className+' · CHAPTER '+chapterNo;
 
-    document.getElementById('chapterIntro').textContent=
-      chapterNo===1
-      ? 'Discover flat shapes, solid shapes and shapes around us.'
-      : chapterNo===2
-      ? 'Explore numbers, number patterns and skip counting.'
-      : 'Learn addition with pictures, number blocks, stories and fun challenges.';
+    // Chapter intro text dynamic ga set avvadaniki
+    if(chapterNo===1){
+      document.getElementById('chapterIntro').textContent='Discover flat shapes, solid shapes and shapes around us.';
+    } else if(chapterNo===2){
+      document.getElementById('chapterIntro').textContent='Explore numbers, number patterns and skip counting.';
+    } else if(chapterNo===3){
+      document.getElementById('chapterIntro').textContent='Explore number names, fruit codes and fun counting puzzles.';
+    } else {
+      document.getElementById('chapterIntro').textContent='Explore Chapter '+chapterNo+' learning content and interactive exercises.';
+    }
 
-    // Chapter 1 and Chapter 2
-    if(chapterNo===1 || chapterNo===2){
+    // Chapter 1, 2, AND 3 ki Question Bank flow (shapeGo) allow cheyyali
+    if(chapterNo===1 || chapterNo===2 || chapterNo===3){
 
       document.querySelector('.topics').style.display='none';
 
-      document.getElementById('progressTitle').textContent=
-        chapterNo===1?'Explore the Shapes':'Fun with Numbers';
+      if(chapterNo===1){
+        document.getElementById('progressTitle').textContent='Explore the Shapes';
+      } else if(chapterNo===2){
+        document.getElementById('progressTitle').textContent='Fun with Numbers';
+      } else if(chapterNo===3){
+        document.getElementById('progressTitle').textContent='Number Names';
+      }
 
       if(chapterNo===1){
         startTrackedActivity(
           'Chapter 1 - Explore the Shapes - Learn',
+          'Learning'
+        );
+      } else if(chapterNo===3){
+        startTrackedActivity(
+          'Chapter 3 - Number Names - Learn',
           'Learning'
         );
       }
@@ -138,7 +152,7 @@ async function openChapter(chapterNo){
 
     } else {
 
-      // Chapter 6 - Addition
+      // Chapter 6 or other addition topics
       document.querySelector('.topics').style.display='grid';
 
       document.getElementById('progressTitle').textContent=
@@ -150,7 +164,7 @@ async function openChapter(chapterNo){
         pendingScreen(pending);
       } else {
         startTrackedActivity(
-          'Chapter 6 - The Art of Addition - Learn',
+          'Chapter '+chapterNo+' - Learn',
           'Learning'
         );
         go('learn');
