@@ -293,7 +293,7 @@ function shapeSheetPracticeView(){
   }
   const q=rows[shapeSheetIndex],opts=[q.optionA,q.optionB,q.optionC].filter(Boolean);
  
-  el.innerHTML=`<h2>✏️ ${activeChapterNo==1 ? 'Shape Practice' : activeChapterNo==2 ? 'Fun with Numbers - Practice' : activeChapterNo==3 ? 'Number Fun - Practice' : 'Chapter Practice'}</h2><p class="hint">Choose the correct answer. You can try again if needed.</p><div class="question"><p class="smallnote">Question ${shapeSheetIndex+1} of ${rows.length}</p>${sheetQuestionImage(q)}<div class="sum" style="font-size:clamp(22px,5vw,34px)">${escapeHtml(q.question)}</div><div class="choices">${opts.map(o=>`<button class="choice" onclick="shapeSheetPracticeAnswer('${encodeURIComponent(o)}')">${escapeHtml(o)}</button>`).join('')}</div><div id="shapeFeedback" class="feedback"></div></div>`;
+  el.innerHTML=`<h2>✏️ ${activeChapterNo==1 ? 'Shape Practice' : activeChapterNo==2 ? 'Fun with Numbers - Practice' : activeChapterNo==3 ? 'Number Fun - Practice' : 'Chapter Practice'}</h2><p class="hint">Choose the correct answer. You can try again if needed.</p><div class="question"><p class="smallnote">Question ${shapeSheetIndex+1} of ${rows.length}</p>${sheetQuestionImage(q)}<div class="sum" style="font-size:clamp(22px,5vw,34px)">${escapeHtml(q.question)}</div><div class="choices">${opts.map(o=>`<button class="choice" onclick="shapeSheetPracticeAnswer('${encodeURIComponent(o)}')">${escapeHtml(o)}</button>`).join('')}</div><div id="shapeFeedback" class="feedback"></div></div>`;}
 async function shapeSheetPracticeAnswer(encoded){
   if(shapePracticeSaving)return;
   const answer=decodeURIComponent(encoded),q=shapeSheetRows.practice[shapeSheetIndex],fb=document.getElementById('shapeFeedback');
