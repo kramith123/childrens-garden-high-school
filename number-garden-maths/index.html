@@ -332,11 +332,15 @@ async function shapeGo(mode){
   shapeMode=mode;
 
   const chapterNo=Number(activeChapterNo);
-  const chapterTitle=chapterNo===1
-    ? 'Explore the Shapes'
-    : chapterNo===2
-    ? 'Fun with Numbers'
-    : 'The Art of Addition';
+const chapterTitle=chapterNo===1
+  ? 'Explore the Shapes'
+  : chapterNo===2
+  ? 'Fun with Numbers'
+  : chapterNo===3
+  ? 'Number Names'
+  : chapterNo===6
+  ? 'The Art of Addition'
+  : 'Chapter ' + chapterNo;
 
   document.querySelectorAll('.step').forEach(b=>
     b.classList.toggle('active',b.dataset.step===mode)
