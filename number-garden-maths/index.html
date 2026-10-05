@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Number Garden | Maths Learning World</title>
-<!-- Question Bank integration: loads Class 1 Chapter 1 Learn/Examples/Practice rows from the central Google Sheet. -->
+<!-- Question Bank integration: loads Class 1 Chapter Learn/Examples/Practice rows from the central Google Sheet. -->
 <style>
 :root{--ink:#24334a;--muted:#65748a;--paper:#f5f8fc;--line:#e1e8ef;--blue:#2878bd;--orange:#e78a2f;--pink:#d9578a;--green:#29976c;--purple:#8661bd}
 *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Arial,Helvetica,sans-serif}
@@ -103,7 +103,6 @@ async function openChapter(chapterNo){
       return;
     }
 
-    // 1 nunchi 14 varaku allow chese laaga check marustunnamu
     if(chapterNo < 1 || chapterNo > 14){
       msg.textContent='This chapter number is not valid.';
       return;
@@ -118,7 +117,6 @@ async function openChapter(chapterNo){
     document.getElementById('studentClassPill').textContent=
       'CLASS '+currentStudent.className+' · CHAPTER '+chapterNo;
 
-    // Chapter intro text dynamic ga set avvadaniki
     if(chapterNo===1){
       document.getElementById('chapterIntro').textContent='Discover flat shapes, solid shapes and shapes around us.';
     } else if(chapterNo===2){
@@ -127,7 +125,6 @@ async function openChapter(chapterNo){
       document.getElementById('chapterIntro').textContent='Explore ' + activeChapterName + ' learning content and interactive exercises.';
     }
 
-    // Chapter 1, 2, AND 3 ki Question Bank flow (shapeGo) allow cheyyali
     if(chapterNo >= 1 && chapterNo <= 14){
 
       document.querySelector('.topics').style.display='none';
@@ -149,11 +146,8 @@ async function openChapter(chapterNo){
 
     } else {
 
-      // Chapter 6 or other addition topics
       document.querySelector('.topics').style.display='grid';
-
-      document.getElementById('progressTitle').textContent=
-        'Your learning journey';
+      document.getElementById('progressTitle').textContent='Your learning journey';
 
       const pending=readPending();
 
@@ -213,26 +207,22 @@ let shapePracticeRunId='', shapePracticeSaving=false;
 let shapeTestRows=[], shapeTestAnswers=[], shapeTestSubmitting=false;
 
 async function loadShapeSheetQuestions(section){
-
   const sectionMap = {
     learn: 'Learn',
     examples: 'Example',
     practice: 'Practice',
     test: 'Test'
   };
-
-  const sheetSection =
-    sectionMap[String(section || '').trim().toLowerCase()] || section;
-
+  const sheetSection = sectionMap[String(section || '').trim().toLowerCase()] || section;
   const data = await apiCall({
     action: 'getQuestions',
     sessionId: currentSessionId,
     chapterNo: Number(activeChapterNo),
     section: sheetSection
   });
-
   return Array.isArray(data.questions) ? data.questions : [];
 }
+
 function safeImageUrl(value){
   const raw=String(value||'').trim();if(!raw)return '';
   let fileId='';
@@ -240,19 +230,16 @@ function safeImageUrl(value){
   const openMatch=raw.match(/[?&]id=([a-zA-Z0-9_-]+)/i);
   if(driveMatch)fileId=driveMatch[1];
   else if(openMatch&&/drive\.google\.com/i.test(raw))fileId=openMatch[1];
-  // Drive thumbnail endpoint is generally more suitable for <img> than the share-page URL.
   if(fileId)return 'https://drive.google.com/thumbnail?id='+encodeURIComponent(fileId)+'&sz=w1200';
   try{
     const u=new URL(raw,window.location.href);
     return (u.protocol==='https:'||u.protocol==='http:')?u.href:'';
   }catch(_){return ''}
 }
+
 function sheetQuestionImage(q){
-  // Apps Script may return either camelCase keys or the exact Google Sheet headers.
-  let imageValue=q.imageUrl||q.imageURL||q.image||q.imageLink||
-    q['Image URL']||q['Image Url']||q['Image Link']||'';
+  let imageValue=q.imageUrl||q.imageURL||q.image||q.imageLink||q['Image URL']||q['Image Url']||q['Image Link']||'';
   let altValue=q.imageAltText||q['Image Alt Text']||q.visual||'Question image';
-  // Keep the already shared Triangle image as a fallback for this first sample question.
   const visual=String(q.visual||q.Visual||'').trim().toUpperCase();
   const questionText=String(q.question||q.Question||'').trim().toLowerCase();
   if(!imageValue && visual==='TRIANGLE' && questionText.includes('what is this shape')){
@@ -266,21 +253,26 @@ function sheetQuestionImage(q){
   const symbols={TRIANGLE:'🔺',SQUARE:'🟦',RECTANGLE:'▭',CIRCLE:'⚪',OVAL:'🥚',PENTAGON:'⬟',HEXAGON:'⬢',SPHERE:'⚽',CONE:'🍦',CYLINDER:'🥫',CUBE:'🎲',CUBOID:'📦'};
   return symbols[visual]?`<div class="pictures" aria-label="${escapeHtml(altValue||visual)}">${symbols[visual]}</div>`:'';
 }
+
 function sheetQuestionCard(q,index,label){
   return `<div class="workcard"><small>${escapeHtml(label||'Question')} ${index+1}</small>${sheetQuestionImage(q)}<b>${escapeHtml(q.question||'')}</b>${q.explanation?`<p class="hint">${escapeHtml(q.explanation)}</p>`:''}</div>`;
 }
+
 function questionBankMessage(title,message){
   document.getElementById('content').innerHTML=`<h2>📚 ${escapeHtml(title)}</h2><div class="lesson"><p>${escapeHtml(message)}</p><p class="hint">Check the Question Bank sheet and Apps Script deployment.</p></div><div class="actions"><button class="btn secondary" onclick="shapeGo('learn')">Back to Learn</button></div>`;
 }
+
 function shapeSheetLearnView(rows){
   const el=document.getElementById('content');
   el.innerHTML=`<h2>🌈 Teacher's Learning Questions</h2><p class="hint">Questions and pictures selected by your teacher.</p><div class="workgrid">${rows.map((q,i)=>sheetQuestionCard(q,i,'Learn')).join('')}</div><div class="actions"><button class="btn primary" onclick="shapeGo('examples')">See Examples →</button></div>`;
 }
+
 function shapeSheetExamplesView(rows){
   const el=document.getElementById('content');
   const title = currentChapterTitle();
   el.innerHTML=`<h2>🍎 ${escapeHtml(title)} – Examples</h2><p class="hint">Read each example carefully.</p><div class="workgrid">${rows.map((q,i)=>sheetQuestionCard(q,i,'Example')).join('')}</div><div class="actions"><button class="btn secondary" onclick="shapeGo('learn')">← Learn</button><button class="btn primary" onclick="shapeGo('practice')">Start Practice →</button></div>`;
 }
+
 function shapeSheetPracticeView(){
   const rows=shapeSheetRows.practice,el=document.getElementById('content');
   const title = currentChapterTitle();
@@ -293,6 +285,7 @@ function shapeSheetPracticeView(){
   const q=rows[shapeSheetIndex],opts=[q.optionA,q.optionB,q.optionC].filter(Boolean);
   el.innerHTML=`<h2>✏️ ${escapeHtml(title)} – Practice</h2><p class="hint">Choose the correct answer. You can try again if needed.</p><div class="question"><p class="smallnote">Question ${shapeSheetIndex+1} of ${rows.length}</p>${sheetQuestionImage(q)}<div class="sum" style="font-size:clamp(22px,5vw,34px)">${escapeHtml(q.question)}</div><div class="choices">${opts.map(o=>`<button class="choice" onclick="shapeSheetPracticeAnswer('${encodeURIComponent(o)}')">${escapeHtml(o)}</button>`).join('')}</div><div id="shapeFeedback" class="feedback"></div></div>`;
 }
+
 async function shapeSheetPracticeAnswer(encoded){
   if(shapePracticeSaving)return;
   const answer=decodeURIComponent(encoded),q=shapeSheetRows.practice[shapeSheetIndex],fb=document.getElementById('shapeFeedback');
@@ -326,10 +319,9 @@ async function shapeSheetPracticeAnswer(encoded){
     if(fb){fb.textContent='Could not save this attempt: '+(err.message||'Please try again.');fb.style.color='#b42318';fb.style.background='#fff1f0';}
   }
 }
+
 async function shapeGo(mode){
-
   shapeMode=mode;
-
   const chapterNo=Number(activeChapterNo);
   const chapterTitle=currentChapterTitle();
 
@@ -337,166 +329,66 @@ async function shapeGo(mode){
     b.classList.toggle('active',b.dataset.step===mode)
   );
 
-  if(activeClock&&(
-    (activeClock.mode==='practice'&&mode!=='practice')||
-    (activeClock.mode==='test'&&mode!=='test')
-  )) pauseClock();
+  if(activeClock&&((activeClock.mode==='practice'&&mode!=='practice')||(activeClock.mode==='test'&&mode!=='test'))) pauseClock();
 
-  // Chapter 2 - Learning
   if(mode==='learn' && chapterNo===2){
-
     finishTrackedActivity();
-
-    startTrackedActivity(
-      'Chapter 2 - Fun with Numbers - Learn',
-      'Learning'
-    );
-
+    startTrackedActivity('Chapter 2 - Fun with Numbers - Learn','Learning');
     chapter2LearnView();
     return;
   }
 
-  // Learn, Examples and Practice
   if(mode==='learn'||mode==='examples'||mode==='practice'){
-
     finishTrackedActivity();
-
-    const labels={
-      learn:'Learn',
-      examples:'Examples',
-      practice:'Practice'
-    };
-
-    startTrackedActivity(
-      'Chapter '+chapterNo+' - '+chapterTitle+' - '+labels[mode],
-      mode==='practice'?'Practice':'Learning'
-    );
-
-    document.getElementById('content').innerHTML=
-      '<p class="hint">Loading questions from your teacher...</p>';
-
+    const labels={learn:'Learn',examples:'Examples',practice:'Practice'};
+    startTrackedActivity('Chapter '+chapterNo+' - '+chapterTitle+' - '+labels[mode],mode==='practice'?'Practice':'Learning');
+    document.getElementById('content').innerHTML='<p class="hint">Loading questions from your teacher...</p>';
     try{
-
       const rows=await loadShapeSheetQuestions(mode);
       shapeSheetRows[mode]=rows;
-
       if(mode==='learn'){
-
-        if(rows.length){
-          shapeSheetLearnView(rows);
-        }
-        else if(chapterNo===1){
-          shapeLearn();
-        }
-        else{
-          questionBankMessage(
-            'No Learning Content',
-            'Learning content for Chapter '+chapterNo+' is being prepared.'
-          );
-        }
-
-      }
-
-      else if(mode==='examples'){
-
-        if(rows.length){
-          shapeSheetExamplesView(rows);
-        }
-        else if(chapterNo===1){
-          shapeExamplesView();
-        }
-        else{
-          questionBankMessage(
-            'No Examples Found',
-            'No ACTIVE Example questions were found for Class '+
-            currentStudent.className+', Chapter '+chapterNo+
-            '. Please check the Question Bank sheet.'
-          );
-        }
-
-      }
-
-      else{
-
+        if(rows.length) shapeSheetLearnView(rows);
+        else if(chapterNo===1) shapeLearn();
+        else questionBankMessage('No Learning Content','Learning content for Chapter '+chapterNo+' is being prepared.');
+      } else if(mode==='examples'){
+        if(rows.length) shapeSheetExamplesView(rows);
+        else if(chapterNo===1) shapeExamplesView();
+        else questionBankMessage('No Examples Found','No ACTIVE Example questions were found for Chapter '+chapterNo+'.');
+      } else {
         if(!rows.length){
-          questionBankMessage(
-            'No Practice Questions',
-            'No ACTIVE Practice questions were returned for Class '+
-            currentStudent.className+', Chapter '+chapterNo+'.'
-          );
+          questionBankMessage('No Practice Questions','No ACTIVE Practice questions were returned for Chapter '+chapterNo+'.');
           return;
         }
-
-        shapeSheetIndex=0;
-        shapeSheetScore=0;
-        shapeSheetAttempts=0;
-        shapePracticeSaving=false;
-
-        shapePracticeRunId=
-          'NG-PRACTICE-'+currentSessionId+'-'+Date.now();
-
+        shapeSheetIndex=0;shapeSheetScore=0;shapeSheetAttempts=0;shapePracticeSaving=false;
+        shapePracticeRunId='NG-PRACTICE-'+currentSessionId+'-'+Date.now();
         beginClock('practice',0);
         shapeSheetPracticeView();
-
       }
-
     }catch(err){
-
-      questionBankMessage(
-        'Question Bank Connection Error',
-        err.message||'Unable to load questions.'
-      );
-
+      questionBankMessage('Question Bank Connection Error',err.message||'Unable to load questions.');
     }
-
     return;
   }
 
-  // Chapter Test
   if(mode==='test'){
-
     finishTrackedActivity();
-
-    startTrackedActivity(
-      'Chapter '+chapterNo+' - '+chapterTitle+' - Chapter Test',
-      'Assessment'
-    );
-
-    document.getElementById('content').innerHTML=
-      '<p class="hint">Loading Chapter Test questions...</p>';
-
+    startTrackedActivity('Chapter '+chapterNo+' - '+chapterTitle+' - Chapter Test','Assessment');
+    document.getElementById('content').innerHTML='<p class="hint">Loading Chapter Test questions...</p>';
     try{
-
       shapeTestRows=await loadShapeSheetQuestions('Test');
-
       if(!shapeTestRows.length){
-
-        questionBankMessage(
-          'No Test Questions',
-          'No ACTIVE Test questions were found for Class '+
-          currentStudent.className+', Chapter '+chapterNo+'.'
-        );
-
+        questionBankMessage('No Test Questions','No ACTIVE Test questions were found for Chapter '+chapterNo+'.');
         return;
       }
-
-      shapeTestAnswers=[];
-      shapeTestIndex=0;
-      shapeTestSubmitting=false;
-
+      shapeTestAnswers=[];shapeTestIndex=0;shapeTestSubmitting=false;
       beginClock('test',0);
       shapeTestView();
-
     }catch(err){
-
-      questionBankMessage(
-        'Question Bank Connection Error',
-        err.message||'Unable to load questions.'
-      );
-
+      questionBankMessage('Question Bank Connection Error',err.message||'Unable to load questions.');
     }
   }
 }
+
 function shapeTestView(){
   const el=document.getElementById('content');
   const title = currentChapterTitle();
@@ -504,11 +396,13 @@ function shapeTestView(){
   const q=shapeTestRows[shapeTestIndex],opts=[q.optionA,q.optionB,q.optionC].filter(Boolean);
   el.innerHTML=`<h2>🏆 ${escapeHtml(title)} – Chapter Test</h2><p class="hint">Choose one answer. Your answers will be checked after you finish the test.</p><div class="question"><p class="smallnote">Question ${shapeTestIndex+1} of ${shapeTestRows.length}</p>${sheetQuestionImage(q)}<div class="sum" style="font-size:clamp(22px,5vw,34px)">${escapeHtml(q.question)}</div><div class="choices">${opts.map(o=>`<button class="choice" onclick="shapeTestAnswer('${encodeURIComponent(o)}')">${escapeHtml(o)}</button>`).join('')}</div></div>`;
 }
+
 function shapeTestAnswer(encoded){
   if(shapeTestSubmitting)return;
   const answer=decodeURIComponent(encoded),q=shapeTestRows[shapeTestIndex];
   shapeTestAnswers.push({questionId:q.questionId,answer:answer});shapeTestIndex++;shapeTestView();
 }
+
 async function submitShapeSheetTest(){
   if(shapeTestSubmitting)return;shapeTestSubmitting=true;
   const elapsed=pauseClock(),el=document.getElementById('content');
@@ -522,6 +416,7 @@ async function submitShapeSheetTest(){
     el.innerHTML=`<h2>Test Result Could Not Be Saved</h2><div class="lesson"><p>${escapeHtml(err.message)}</p><p class="hint">Your answers are still held on this screen. Please retry.</p></div><div class="actions"><button class="btn primary" onclick="submitShapeSheetTest()">Retry Submit</button></div>`;
   }
 }
+
 function shapeLearn(){
  const el=document.getElementById('content');
  el.innerHTML=`<h2>🌈 Explore the Shapes</h2><p class="hint">Look around you. Shapes are everywhere!</p>
@@ -531,20 +426,25 @@ function shapeLearn(){
  <div class="lesson"><h3>Remember</h3><p>Flat shapes are 2D shapes. Solid shapes are 3D shapes. We can find these shapes in objects around us.</p></div>
  <div class="actions"><button class="btn primary" onclick="shapeGo('examples')">See Examples →</button></div>`;
 }
+
 function shapeExamplesView(){
  const el=document.getElementById('content');
  el.innerHTML=`<h2>🍎 Shape Examples</h2><p class="hint">Read each example and remember the shape.</p><div class="workgrid">${shapeExamples.map((x,i)=>`<div class="workcard"><small>Example ${i+1}</small><div class="pictures">${x.v}</div><b>${x.q}</b><p><b>${x.a}</b></p><p class="hint">${x.why}</p></div>`).join('')}</div><div class="actions"><button class="btn secondary" onclick="shapeGo('learn')">← Learn</button><button class="btn primary" onclick="shapeGo('practice')">Start Practice →</button></div>`;
 }
+
 function shapePracticeView(){
  const el=document.getElementById('content');
  if(shapePracticeIndex>=20){const elapsed=pauseClock();const score=shapePracticeScore;const maths={level:'Class 1',topic:'Explore the Shapes - Practice',totalQuestions:20,correctAnswers:score,wrongAnswers:20-score,marks:score,timeTaken:durationText(elapsed)};el.innerHTML=`<h2>🌟 Practice Completed!</h2><div class="lesson"><div class="sum">${score} / 20</div><p>Correct answers. Keep exploring shapes!</p><p id="mathsSaveStatus" class="hint">Saving your result...</p><button id="retryMathsSave" class="btn secondary" style="display:none" onclick="retryLatestMathsResult()">Retry Saving Result</button></div><div class="actions"><button class="btn secondary" onclick="shapeGo('practice')">Practise Again</button><button class="btn primary" onclick="shapeGo('test')">Go to Chapter Test →</button></div>`;saveFinishedMathsResult(score+'/20',maths);return;}
- const q=shapeQuestions[shapePracticeIndex];el.innerHTML=`<h2>✏️ Shape Practice</h2><p class="hint">Choose the correct answer. You can try again if needed.</p><div class="question"><p class="smallnote">Question ${shapePracticeIndex+1} of 20</p><div class="sum">${q[0]}</div><div class="choices">${q[1].map(o=>`<button class="choice" onclick="shapePracticeAnswer('${encodeURIComponent(o)}')">${o}</button>`).join('')}</div><div id="shapeFeedback" class="feedback"></div></div>`;
+ const q=shapeQuestions[shapePracticeIndex];const title = currentChapterTitle();
+ el.innerHTML=`<h2>✏️ ${escapeHtml(title)} – Practice</h2><p class="hint">Choose the correct answer. You can try again if needed.</p><div class="question"><p class="smallnote">Question ${shapePracticeIndex+1} of 20</p><div class="sum">${q[0]}</div><div class="choices">${q[1].map(o=>`<button class="choice" onclick="shapePracticeAnswer('${encodeURIComponent(o)}')">${o}</button>`).join('')}</div><div id="shapeFeedback" class="feedback"></div></div>`;
 }
+
 function shapePracticeAnswer(encoded){
  const answer=decodeURIComponent(encoded),q=shapeQuestions[shapePracticeIndex],fb=document.getElementById('shapeFeedback');
  if(answer===q[2]){shapePracticeScore++;shapePracticeIndex++;shapeAttempts=0;fb.textContent='Correct! 🌟';fb.style.color='#23845b';setTimeout(shapePracticeView,350);}
  else{shapeAttempts++;fb.textContent=shapeAttempts===1?'Good try! Look carefully and try once more.':'Not quite. Think about the shape and try again.';fb.style.color='#b45309';}
 }
+
 function backToChapters(){
   if(activeClock){writePending();pauseClock();}
   finishTrackedActivity();
@@ -555,6 +455,7 @@ function backToChapters(){
   document.getElementById('studentClassPill').textContent='CLASS '+currentStudent.className+' · MATHS';
   loadChapterList();
 }
+
 async function studentLogin(){
   const input = document.getElementById('loginIdInput');
   const btn = document.getElementById('loginBtn');
@@ -597,6 +498,7 @@ document.getElementById('loginBtn').addEventListener('click', studentLogin);
 document.getElementById('loginIdInput').addEventListener('keydown', e => {
   if(e.key === 'Enter') studentLogin();
 });
+
 async function startTrackedActivity(name,type){if(!currentSessionId)return;try{if(currentActivityId){await apiCall({action:'completeActivity',activityId:currentActivityId,completed:true})}}catch(e){}try{const r=await apiCall({action:'startActivity',sessionId:currentSessionId,activity:name,type});currentActivityId=r.activityId;currentActivityName=name}catch(e){console.warn('Activity tracking:',e.message)}}
 function finishTrackedActivity(extra={}){if(!currentActivityId)return Promise.resolve(null);const id=currentActivityId;currentActivityId='';return apiCall({action:'completeActivity',activityId:id,completed:true,...extra}).catch(e=>{console.warn('Activity tracking:',e.message);return {error:e.message}})}
 function mathsResultStorageKey(resultId){return 'ng_pending_math_result_'+resultId}
@@ -671,7 +573,7 @@ let qs=bank[topic].practice;
 if(modeIndex>=qs.length){done('practice');const elapsed=pauseClock();clearPending();const scoreText=modeScore+'/'+qs.length;const maths={level:'Class 1',topic:names[topic]+' - Practice',totalQuestions:qs.length,correctAnswers:modeScore,wrongAnswers:qs.length-modeScore,marks:modeScore,timeTaken:durationText(elapsed)};el.innerHTML=banner()+`<h2>🌟 Practice Completed!</h2><div class="lesson"><div class="sum">${modeScore} / ${qs.length}</div><p>Correct answers. Keep growing your Maths skills!</p><p id="mathsSaveStatus" class="hint">Saving your result...</p><button id="retryMathsSave" class="btn secondary" style="display:none" onclick="retryLatestMathsResult()">Retry Saving Result</button></div><div class="actions"><button class="btn secondary" onclick="modeIndex=0;modeScore=0;practice()">Practise Again</button><button class="btn primary" onclick="go('test')">Go to Chapter Test →</button></div>`;saveFinishedMathsResult(scoreText,maths);return}
 let [a,b]=qs[modeIndex];let visual=questionVisual(a,b,modeIndex);
 el.innerHTML=banner()+`<h2>✏️ Practice Garden</h2><p class="hint">Solve the sum. You have ${qs.length} questions in this practice set.</p><div class="question">${visual}<div class="sum">${a} + ${b} = ?</div><input class="answer" id="ans" type="number" inputmode="numeric" aria-label="Your answer"><div class="feedback" id="fb"></div></div><div class="actions"><button class="btn primary" id="check">Check Answer</button><button class="btn secondary" onclick="quitActivity()">Quit & Save</button></div><p class="smallnote">Question ${modeIndex+1} of ${qs.length} · ${names[topic]}</p>`;writePending();
-let attempts=0;document.getElementById('check').onclick=()=>{let v=document.getElementById('ans').value,fb=document.getElementById('fb');if(v===''){fb.textContent='Please write your answer.';return}let btn=document.getElementById('check');if(+v===a+b){modeScore++;modeIndex++;writePending();fb.textContent='Correct! 🌟 Brilliant!';fb.style.color='#23845b';btn.textContent='Next Sum →';btn.onclick=()=>{practice()}}else{attempts++;fb.textContent=attempts===1?'Good try! 😊 Count the pictures or check the tens and ones. Try once more!':'Nice effort! 🌱 Let us review this type of question after practice.';fb.style.color='#b45309';if(attempts>=2){btn.textContent='Next Sum →';btn.onclick=()=>{modeIndex++;writePending();practice()};}else{document.getElementById('ans').value='';document.getElementById('ans').focus();}}};
+let attempts=0;document.getElementById('check').onclick=()=>{let v=document.getElementById('ans').value,fb=document.getElementById('fb');if(v===''){fb.textContent='Please write your answer.';return}let btn=document.getElementById('check');if(+v===a+b){modeScore++;modeIndex++;writePending();fb.textContent='Correct! 🌟 Brilliant!';fb.style.color='#23845b';btn.textContent='Next Sum →';btn.onclick=()=>{practice()}}else{attempts++;fb.textContent=attempts===1?'Good try! 😊 Count the pictures or check the tens and ones. Try once more!':'Nice effort! 🌱 Let us review this type of question after practice.';fb.style.color='#b45309';if(attempts>=2){btn.textContent='Next Sum →';btn.onclick=()=>{modeIndex++;writePending();practice()};}else{document.getElementById('ans').value='';document.getElementById('ans'].focus();}}};
 }
 function test(){
 if(!activeClock||activeClock.mode!=='test')beginClock('test',0);
@@ -681,11 +583,8 @@ let [a,b]=qs[testIndex],correct=a+b,opts=[correct,correct+1,Math.max(0,correct-1
 el.innerHTML=banner()+`<h2>🏆 Star Challenge – Chapter Test</h2><p class="hint">Choose the correct answer. Try your best!</p><div class="question">${questionVisual(a,b,testIndex)}<div class="sum">${a} + ${b} = ?</div><div class="choices">${opts.map(n=>`<button class="choice" data-v="${n}">${n}</button>`).join('')}</div><div class="feedback" id="fb"></div></div><p class="smallnote">Question ${testIndex+1} of ${qs.length}</p><div class="actions"><button class="btn secondary" onclick="quitActivity()">Quit & Save</button></div>`;writePending();
 document.querySelectorAll('.choice').forEach(btn=>btn.onclick=()=>{document.querySelectorAll('.choice').forEach(x=>x.disabled=true);if(+btn.dataset.v===correct){testScore++;writePending();btn.style.background='#eaf8f0';btn.style.borderColor='#29976c';document.getElementById('fb').textContent='Correct! ⭐'}else{btn.style.borderColor='#d97706';document.getElementById('fb').textContent='Good try! Keep going. You will see your score at the end.';}testIndex++;writePending();let next=document.createElement('button');next.className='btn primary';next.textContent=testIndex>=qs.length?'See My Result':'Next Question →';next.onclick=()=>{test()};let actions=document.createElement('div');actions.className='actions';actions.append(next);el.append(actions)});
 }
-// Route every Chapter 1 step button through the Question Bank flow.
 document.querySelectorAll('.step[data-step]').forEach(btn=>{
   btn.addEventListener('click',()=>shapeGo(btn.dataset.step));
 });
-
-// Keep the old built-in Chapter 1 test disabled; only active Sheet questions are used.
 updateProgress();
 </script></body></html>
