@@ -3,7 +3,6 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Number Garden | Maths Learning World</title>
-<!-- Question Bank integration: loads Class 1 Chapter Learn/Examples/Practice rows from the central Google Sheet. -->
 <style>
 :root{--ink:#24334a;--muted:#65748a;--paper:#f5f8fc;--line:#e1e8ef;--blue:#2878bd;--orange:#e78a2f;--pink:#d9578a;--green:#29976c;--purple:#8661bd}
 *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:Arial,Helvetica,sans-serif}
@@ -53,6 +52,7 @@ let shapePracticeIndex=0, shapePracticeScore=0, shapeTestIndex=0, shapeTestScore
 function currentChapterTitle(){
   return activeChapterName || (activeChapterNo === 1 ? 'Explore the Shapes' : activeChapterNo === 2 ? 'Fun with Numbers' : ('Chapter ' + activeChapterNo));
 }
+
 async function loadChapterList(){
   document.getElementById('chapterBrowser').style.display='block';
   document.getElementById('learningArea').style.display='none';
@@ -67,6 +67,7 @@ async function loadChapterList(){
     document.getElementById('chapterMessage').textContent='Unable to load chapters: '+e.message;
   }
 }
+
 function renderChapterList(){
   const list=document.getElementById('chapterList');
   document.getElementById('chapterMessage').textContent=availableChapters.length?
@@ -81,13 +82,13 @@ function renderChapterList(){
   list.querySelectorAll('.chapter-card.unlocked').forEach(btn=>
     btn.addEventListener('click',()=>openChapter(Number(btn.dataset.chapter))));
 }
+
 function escapeHtml(value){
   return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 async function openChapter(chapterNo){
   chapterNo = Number(chapterNo);
-
   const msg=document.getElementById('chapterMessage');
   msg.textContent='Checking chapter access...';
 
@@ -126,42 +127,28 @@ async function openChapter(chapterNo){
     }
 
     if(chapterNo >= 1 && chapterNo <= 14){
-
       document.querySelector('.topics').style.display='none';
       document.getElementById('progressTitle').textContent = activeChapterName;
 
       if(chapterNo===1){
-        startTrackedActivity(
-          'Chapter 1 - Explore the Shapes - Learn',
-          'Learning'
-        );
+        startTrackedActivity('Chapter 1 - Explore the Shapes - Learn', 'Learning');
       } else {
-        startTrackedActivity(
-          'Chapter ' + chapterNo + ' - ' + activeChapterName + ' - Learn',
-          'Learning'
-        );
+        startTrackedActivity('Chapter ' + chapterNo + ' - ' + activeChapterName + ' - Learn', 'Learning');
       }
 
       shapeGo('learn');
-
     } else {
-
       document.querySelector('.topics').style.display='grid';
       document.getElementById('progressTitle').textContent='Your learning journey';
 
       const pending=readPending();
-
       if(pending&&bank[pending.topic]&&bank[pending.topic][pending.mode]){
         pendingScreen(pending);
       } else {
-        startTrackedActivity(
-          'Chapter '+chapterNo+' - Learn',
-          'Learning'
-        );
+        startTrackedActivity('Chapter '+chapterNo+' - Learn', 'Learning');
         go('learn');
       }
     }
-
   }catch(e){
     msg.textContent=e.message;
   }
@@ -177,6 +164,7 @@ const shapeExamples=[
 {q:'Which 3D shape has a pointed top and a circular base?',v:'🍦',a:'Cone',why:'A cone has one circular base and one pointed top.'},
 {q:'Which 3D shape looks like a can?',v:'🥫',a:'Cylinder',why:'A cylinder has two flat circular faces and one curved surface.'}
 ];
+
 const shapeQuestions=[
 ['How many sides does a triangle have?',['2','3','4'],'3','A triangle has 3 sides.'],
 ['How many corners does a square have?',['3','4','5'],'4','A square has 4 corners.'],
@@ -199,20 +187,15 @@ const shapeQuestions=[
 ['How many sides does a pentagon have?',['4','5','6'],'5','A pentagon has 5 sides.'],
 ['Which one is a flat 2D shape?',['Triangle','Sphere','Cylinder'],'Triangle','A triangle is flat. Sphere and cylinder are 3D shapes.']
 ];
-let shapeMode='learn';
 
+let shapeMode='learn';
 const shapeSheetRows={learn:[],examples:[],practice:[],test:[]};
 let shapeSheetIndex=0, shapeSheetScore=0, shapeSheetAttempts=0;
 let shapePracticeRunId='', shapePracticeSaving=false;
 let shapeTestRows=[], shapeTestAnswers=[], shapeTestSubmitting=false;
 
 async function loadShapeSheetQuestions(section){
-  const sectionMap = {
-    learn: 'Learn',
-    examples: 'Example',
-    practice: 'Practice',
-    test: 'Test'
-  };
+  const sectionMap = { learn: 'Learn', examples: 'Example', practice: 'Practice', test: 'Test' };
   const sheetSection = sectionMap[String(section || '').trim().toLowerCase()] || section;
   const data = await apiCall({
     action: 'getQuestions',
@@ -573,7 +556,7 @@ let qs=bank[topic].practice;
 if(modeIndex>=qs.length){done('practice');const elapsed=pauseClock();clearPending();const scoreText=modeScore+'/'+qs.length;const maths={level:'Class 1',topic:names[topic]+' - Practice',totalQuestions:qs.length,correctAnswers:modeScore,wrongAnswers:qs.length-modeScore,marks:modeScore,timeTaken:durationText(elapsed)};el.innerHTML=banner()+`<h2>🌟 Practice Completed!</h2><div class="lesson"><div class="sum">${modeScore} / ${qs.length}</div><p>Correct answers. Keep growing your Maths skills!</p><p id="mathsSaveStatus" class="hint">Saving your result...</p><button id="retryMathsSave" class="btn secondary" style="display:none" onclick="retryLatestMathsResult()">Retry Saving Result</button></div><div class="actions"><button class="btn secondary" onclick="modeIndex=0;modeScore=0;practice()">Practise Again</button><button class="btn primary" onclick="go('test')">Go to Chapter Test →</button></div>`;saveFinishedMathsResult(scoreText,maths);return}
 let [a,b]=qs[modeIndex];let visual=questionVisual(a,b,modeIndex);
 el.innerHTML=banner()+`<h2>✏️ Practice Garden</h2><p class="hint">Solve the sum. You have ${qs.length} questions in this practice set.</p><div class="question">${visual}<div class="sum">${a} + ${b} = ?</div><input class="answer" id="ans" type="number" inputmode="numeric" aria-label="Your answer"><div class="feedback" id="fb"></div></div><div class="actions"><button class="btn primary" id="check">Check Answer</button><button class="btn secondary" onclick="quitActivity()">Quit & Save</button></div><p class="smallnote">Question ${modeIndex+1} of ${qs.length} · ${names[topic]}</p>`;writePending();
-let attempts=0;document.getElementById('check').onclick=()=>{let v=document.getElementById('ans').value,fb=document.getElementById('fb');if(v===''){fb.textContent='Please write your answer.';return}let btn=document.getElementById('check');if(+v===a+b){modeScore++;modeIndex++;writePending();fb.textContent='Correct! 🌟 Brilliant!';fb.style.color='#23845b';btn.textContent='Next Sum →';btn.onclick=()=>{practice()}}else{attempts++;fb.textContent=attempts===1?'Good try! 😊 Count the pictures or check the tens and ones. Try once more!':'Nice effort! 🌱 Let us review this type of question after practice.';fb.style.color='#b45309';if(attempts>=2){btn.textContent='Next Sum →';btn.onclick=()=>{modeIndex++;writePending();practice()};}else{document.getElementById('ans').value='';document.getElementById('ans'].focus();}}};
+let attempts=0;document.getElementById('check').onclick=()=>{let v=document.getElementById('ans').value,fb=document.getElementById('fb');if(v===''){fb.textContent='Please write your answer.';return}let btn=document.getElementById('check');if(+v===a+b){modeScore++;modeIndex++;writePending();fb.textContent='Correct! 🌟 Brilliant!';fb.style.color='#23845b';btn.textContent='Next Sum →';btn.onclick=()=>{practice()}}else{attempts++;fb.textContent=attempts===1?'Good try! 😊 Count the pictures or check the tens and ones. Try once more!':'Nice effort! 🌱 Let us review this type of question after practice.';fb.style.color='#b45309';if(attempts>=2){btn.textContent='Next Sum →';btn.onclick=()=>{modeIndex++;writePending();practice()};}else{document.getElementById('ans').value='';document.getElementById('ans').focus();}}};
 }
 function test(){
 if(!activeClock||activeClock.mode!=='test')beginClock('test',0);
