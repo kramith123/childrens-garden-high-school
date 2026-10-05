@@ -88,7 +88,6 @@ async function openChapter(chapterNo){
     const access=await apiCall({action:'checkChapterAccess',sessionId:currentSessionId,chapterNo});
     if(!access.allowed){msg.textContent=access.message||'This chapter is locked.';return;}
     
-    // 1 nunchi 14 varaku allow chese condition
     if(chapterNo < 1 || chapterNo > 14){
       msg.textContent='Invalid chapter number: '+chapterNo;
       return;
@@ -99,20 +98,25 @@ async function openChapter(chapterNo){
     document.getElementById('learningArea').style.display='block';
     document.getElementById('studentClassPill').textContent='CLASS '+currentStudent.className+' · CHAPTER '+chapterNo;
     
-    // Chapter intro text dynamic ga set avvadaniki
+    // Chapter intro text
     if(chapterNo===1){
       document.getElementById('chapterIntro').textContent='Discover flat shapes, solid shapes and shapes around us.';
     } else if(chapterNo===2){
       document.getElementById('chapterIntro').textContent='Explore numbers, number patterns and skip counting.';
+    } else if(chapterNo===3){
+      document.getElementById('chapterIntro').textContent='Explore number names, fruit codes and fun counting puzzles.';
     } else {
       document.getElementById('chapterIntro').textContent='Explore Chapter '+chapterNo+' learning content and interactive exercises.';
     }
 
-    // Chapter 1 & 2 ki separate layouts, 3 nunchi 14 varaku Question Bank flow (Chapter 6 laage)
-    if(chapterNo===1 || chapterNo===2){
+    // 💡 IMPORTANT: Chapter 1, 2, AND 3 ki Question Bank nunchi load avvadaniki ikkada allow cheyyali
+    if(chapterNo===1 || chapterNo===2 || chapterNo===3){
       document.querySelector('.topics').style.display='none';
-      document.getElementById('progressTitle').textContent=chapterNo===1?'Explore the Shapes':'Fun with Numbers';
-      shapeGo('learn');
+      if(chapterNo===1) document.getElementById('progressTitle').textContent='Explore the Shapes';
+      else if(chapterNo===2) document.getElementById('progressTitle').textContent='Fun with Numbers';
+      else if(chapterNo===3) document.getElementById('progressTitle').textContent='Number Names';
+      
+      shapeGo('learn'); // Idi sheet nunchi Learn/Example/Practice/Test questions ni తెస్తుంది
     } else {
       document.querySelector('.topics').style.display='grid';
       document.getElementById('progressTitle').textContent='Your learning journey';
