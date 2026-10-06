@@ -24,7 +24,7 @@ table{border-collapse:collapse;margin:12px auto;background:white}td,th{border:1p
 <button id="loginBtn" class="btn primary" style="width:100%">Login & Start Maths →</button><p id="loginError" style="color:#b91c1c;font-weight:bold;min-height:22px"></p>
 </section>
 <main id="mathsApp" style="display:none">
-<section class="welcome"><div><h1 id="studentWelcome">Welcome to Class 1 Maths!</h1><p id="chapterIntro">Learn addition with pictures, number blocks, stories and fun challenges.</p></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><div class="pill" id="studentClassPill">CLASS 1 · MATHS</div><button class="btn secondary" type="button" onclick="backToChapters()">← Chapters</button></div></section>
+<section class="welcome"><div><h1 id="studentWelcome">Welcome to Class 1 Maths!</h1><p id="chapterIntro">Learn addition with pictures, number blocks, stories and fun challenges.</p></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><div class="pill" id="studentClassPill">CLASS 1 · MATHS</div><button class="btn secondary" type="button" onclick="backToChapters()">← Chapters</button><button class="btn secondary" type="button" onclick="studentLogout()">Logout</button></div></section>
 <section id="chapterBrowser" class="panel" style="display:none;min-height:0"><div class="chapter-head"><div><h2>📚 Choose Your Chapter</h2><p class="hint">All chapters are shown. Open the chapters unlocked by your teacher.</p></div><span class="pill" id="chapterClassLabel">CLASS 1</span></div><div id="chapterMessage" class="hint" role="status"></div><div id="chapterList" class="chapter-grid"></div></section><section id="learningArea" style="display:none"><section class="progress"><div class="progressline"><span id="progressTitle">Your learning journey</span><span id="progressText">0 of 4 steps completed</span></div><div class="bar"><div class="fill" id="fill"></div></div></section>
 <div class="topics">
 <button class="topic active" style="--topic:#d97720;--tint:#fff2df" data-topic="picture"><span class="topicicon">🍊</span>Picture Addition<small>Add groups • Number line • Picture sums</small></button>
@@ -614,6 +614,19 @@ function backToChapters(){
   document.getElementById('chapterBrowser').style.display='block';
   document.getElementById('studentClassPill').textContent='CLASS '+currentStudent.className+' · MATHS';
   loadChapterList();
+}
+
+function studentLogout(){
+  currentStudent=null;
+  currentSessionId='';
+  currentActivityId='';
+  currentActivityName='';
+
+  document.getElementById('mathsApp').style.display='none';
+  document.getElementById('loginGate').style.display='block';
+
+  document.getElementById('loginIdInput').value='';
+  document.getElementById('loginError').textContent='';
 }
 async function studentLogin(){const input=document.getElementById('loginIdInput'),btn=document.getElementById('loginBtn'),err=document.getElementById('loginError');const loginId=input.value.trim();err.textContent='';if(!loginId){err.textContent='Please enter your Login ID.';return}btn.disabled=true;btn.textContent='Checking...';try{const data=await apiCall({action:'login',loginId,appId:'NG',source:'Number Garden Maths'});currentStudent=data;currentSessionId=data.sessionId;saved.clear();JSON.parse(localStorage.getItem(progressKey())||'[]').forEach(x=>saved.add(x));updateProgress();document.getElementById('studentWelcome').textContent='Welcome, '+data.studentName+'!';document.getElementById('studentClassPill').textContent='CLASS '+data.className+' · MATHS';document.getElementById('loginGate').style.display='none';document.getElementById('mathsApp').style.display='block';await loadChapterList();}catch(e){err.textContent=e.message}finally{btn.disabled=false;btn.textContent='Login & Start Maths →'}}
 document.getElementById('loginBtn').addEventListener('click',studentLogin);document.getElementById('loginIdInput').addEventListener('keydown',e=>{if(e.key==='Enter')studentLogin()});
