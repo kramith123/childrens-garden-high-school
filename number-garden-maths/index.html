@@ -371,6 +371,7 @@ async function shapeSheetPracticeAnswer(encoded){
 async function shapeGo(mode){
 const previousMode=shapeMode;
   shapeMode=mode;
+  window.lastActiveStep=mode;
 
 if(mode==='examples' && previousMode==='learn'){
   done('learn');
