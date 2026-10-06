@@ -392,6 +392,16 @@ const chapterTitle=chapterNo===1
   ? 'The Art of Addition'
   : 'Chapter ' + chapterNo;
 
+  function goPreviousStep(){
+  const steps=['learn','examples','practice','test'];
+  const current=window.lastActiveStep||'learn';
+  const index=steps.indexOf(current);
+
+  if(index>0){
+    shapeGo(steps[index-1]);
+  }
+}
+
   renderNavigationBar();
   
   document.querySelectorAll('.step').forEach(b=>
