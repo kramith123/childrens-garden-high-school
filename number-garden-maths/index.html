@@ -597,7 +597,7 @@ twodigit:{examples:[[15,12],[23,14],[32,16],[41,27],[52,13],[34,25],[26,32],[43,
 zero:{examples:[[4,0],[0,7],[9,0],[0,5],[6,0],[0,8],[10,0],[0,12]],practice:[[4,0],[0,7],[9,0],[0,5],[6,0],[0,8],[10,0],[0,12],[3,0],[0,11],[8,0],[0,4],[15,0],[0,9],[7,0],[0,13],[2,0],[0,6],[14,0],[0,10]],test:[[4,0],[0,7],[9,0],[0,5],[6,0],[0,8],[10,0],[0,12],[3,0],[0,11]]},
 word:{examples:[[3,2],[4,3],[5,2],[6,3],[2,6],[7,2],[8,4],[9,5]],practice:[[3,2],[4,3],[5,2],[6,3],[2,6],[7,2],[8,4],[9,5],[6,6],[7,8],[10,4],[11,5],[12,3],[8,7],[9,9],[13,4],[14,5],[6,8],[12,6],[15,3]],test:[[3,2],[4,3],[5,2],[6,3],[2,6],[7,2],[8,4],[9,5],[6,6],[7,8]]}
 };
-function k(s){return topic+'_'+s}
+function k(s){return 'chapter_'+activeChapterNo+'_'+s}
 function updateProgress(){let n=['learn','examples','practice','test'].filter(s=>saved.has(k(s))).length;document.getElementById('progressText').textContent=n+' of 4 steps completed';document.getElementById('fill').style.width=n*25+'%';document.getElementById('progressTitle').textContent=names[topic]+' learning journey'}
 function done(s){saved.add(k(s));localStorage.setItem(progressKey(),JSON.stringify([...saved]));updateProgress()}
 function setTopic(t){if(activeClock){writePending();pauseClock()}topic=t;modeIndex=0;modeScore=0;testIndex=0;testScore=0;document.querySelectorAll('.topic').forEach(b=>b.classList.toggle('active',b.dataset.topic===t));go('learn')}
