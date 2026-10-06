@@ -39,6 +39,7 @@ table{border-collapse:collapse;margin:12px auto;background:white}td,th{border:1p
 <button class="step" data-step="test"><span>🏆</span>4. Chapter Test<small>Check learning</small></button>
 </nav>
 <section class="panel" id="content" aria-live="polite"></section>
+<div id="navigationBar"></div>
 <div class="footer">Number Garden · Maths Learning World</div></section>
 </main>
 <script>
@@ -561,6 +562,20 @@ function resumeCurrentStep(){
   if(activeChapterNo){
     shapeGo(step);
   }
+}
+
+function renderNavigationBar(){
+  const el=document.getElementById('navigationBar');
+  if(!el)return;
+
+  el.innerHTML=`
+    <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:14px 0">
+      <button class="btn secondary" onclick="goPreviousStep()">← Previous</button>
+      <button class="btn secondary" onclick="resumeCurrentStep()">▶ Resume</button>
+      <button class="btn primary" onclick="goNextStep()">Next →</button>
+      <button class="btn secondary" onclick="studentLogout()">Logout</button>
+    </div>
+  `;
 }
   
 function shapeTestView(){
