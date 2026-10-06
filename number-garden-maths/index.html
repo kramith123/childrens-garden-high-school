@@ -392,20 +392,8 @@ const chapterTitle=chapterNo===1
   ? 'The Art of Addition'
   : 'Chapter ' + chapterNo;
 
-  function goPreviousStep(){
-  const steps=['learn','examples','practice','test'];
-  const current=window.lastActiveStep||'learn';
-  const index=steps.indexOf(current);
-
-  if(index>0){
-    shapeGo(steps[index-1]);
-  }
-}
-
-  renderNavigationBar();
-  
   document.querySelectorAll('.step').forEach(b=>
-    b.classList.toggle('active',b.dataset.step===mode)
+  b.classList.toggle('active',b.dataset.step===mode)
   );
 
   if(activeClock&&(
@@ -569,27 +557,7 @@ const chapterTitle=chapterNo===1
   }
 }
 
-function resumeCurrentStep(){
-  const step=window.lastActiveStep||'learn';
-  if(activeChapterNo){
-    shapeGo(step);
-  }
-}
-
-function renderNavigationBar(){
-  const el=document.getElementById('navigationBar');
-  if(!el)return;
-
-  el.innerHTML=`
-    <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:14px 0">
-      <button class="btn secondary" onclick="goPreviousStep()">← Previous</button>
-      <button class="btn secondary" onclick="resumeCurrentStep()">▶ Resume</button>
-      <button class="btn primary" onclick="goNextStep()">Next →</button>
-      <button class="btn secondary" onclick="studentLogout()">Logout</button>
-    </div>
-  `;
-}
-  
+ 
 function shapeTestView(){
   const el=document.getElementById('content');
   if(shapeTestIndex>=shapeTestRows.length){submitShapeSheetTest();return;}
