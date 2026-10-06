@@ -555,6 +555,14 @@ const chapterTitle=chapterNo===1
     }
   }
 }
+
+function resumeCurrentStep(){
+  const step=window.lastActiveStep||'learn';
+  if(activeChapterNo){
+    shapeGo(step);
+  }
+}
+  
 function shapeTestView(){
   const el=document.getElementById('content');
   if(shapeTestIndex>=shapeTestRows.length){submitShapeSheetTest();return;}
