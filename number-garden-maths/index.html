@@ -392,6 +392,8 @@ const chapterTitle=chapterNo===1
   ? 'The Art of Addition'
   : 'Chapter ' + chapterNo;
 
+  renderNavigationBar();
+  
   document.querySelectorAll('.step').forEach(b=>
     b.classList.toggle('active',b.dataset.step===mode)
   );
