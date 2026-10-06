@@ -368,9 +368,16 @@ async function shapeSheetPracticeAnswer(encoded){
   }
 }
 async function shapeGo(mode){
-
+const previousMode=shapeMode;
   shapeMode=mode;
 
+if(mode==='examples' && previousMode==='learn'){
+  done('learn');
+}
+
+if(mode==='practice' && previousMode==='examples'){
+  done('examples');
+}
   const chapterNo=Number(activeChapterNo);
 const chapterTitle=chapterNo===1
   ? 'Explore the Shapes'
