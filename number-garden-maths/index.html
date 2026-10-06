@@ -326,6 +326,7 @@ function shapeSheetExamplesView(rows){
 function shapeSheetPracticeView(){
   const rows=shapeSheetRows.practice,el=document.getElementById('content');
   if(shapeSheetIndex>=rows.length){
+    done('practice');
     const elapsed=pauseClock(),score=shapeSheetScore,total=rows.length;
     const maths={level:'Class 1',topic:'Explore the Shapes - Question Bank Practice',totalQuestions:total,correctAnswers:score,wrongAnswers:total-score,marks:score,timeTaken:durationText(elapsed)};
     el.innerHTML=`<h2>🌟 Practice Completed!</h2><div class="lesson"><div class="sum">${score} / ${total}</div><p>Correct answers. Keep exploring shapes!</p><p id="mathsSaveStatus" class="hint">Saving your result...</p><button id="retryMathsSave" class="btn secondary" style="display:none" onclick="retryLatestMathsResult()">Retry Saving Result</button></div><div class="actions"><button class="btn secondary" onclick="shapeGo('practice')">Practise Again</button><button class="btn primary" onclick="shapeGo('test')">Go to Chapter Test →</button></div>`;
