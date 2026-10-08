@@ -123,6 +123,151 @@ function renderReportHtml(r){const t=totalsOf(r),cmp=comparisonFor(r),cmpHtml=cm
 function downloadPdf(){try{const r=currentReport();const w=window.open('','_blank');if(!w)throw new Error('Please allow pop-ups to print or save the PDF.');w.document.open();w.document.write(renderReportHtml(r));w.document.close();w.focus();setTimeout(()=>w.print(),400);$('reportStatus').textContent='PDF report opened. Choose Save as PDF in the print window.'}catch(e){$('reportStatus').textContent=e.message}}
 function xmlCell(v){return '<Cell><Data ss:Type="String">'+esc(v)+'</Data></Cell>'}
 function xmlRow(values){return '<Row>'+values.map(xmlCell).join('')+'</Row>'}
+function downloadStudentPDF(){
+  try{
+    const r=currentReport();
+    const students=r.students||[];
+
+    if(!students.length){
+      throw new Error('No student records found for the selected filters.');
+    }
+
+    const w=window.open('','_blank');
+    if(!w){
+      throw new Error('Please allow pop-ups to print or save the PDF.');
+    }
+
+    let html=`
+      <html>
+      <head>
+        <title>Student-wise Performance</title>
+        <style>
+          body{font-family:Arial,sans-serif;padding:25px;color:#222}
+          h1{font-size:20px;margin-bottom:5px}
+          .meta{font-size:12px;margin-bottom:18px}
+          table{width:100%;border-collapse:collapse;font-size:11px}
+          th,td{border:1px solid #999;padding:7px;text-align:center}
+          th{font-weight:bold}
+          td:first-child{text-align:left}
+        </style>
+      </head>
+      <body>
+        <h1>Student-wise Performance</h1>
+        <div class="meta">
+          CHILDREN’S GARDEN E.M HIGH SCHOOL<br>
+          From: ${esc(r.from||'All')} &nbsp;&nbsp;
+          To: ${esc(r.to||'All')}
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Class</th>
+              <th>Login ID</th>
+              <th>Practice</th>
+              <th>Test</th>
+              <th>Correct</th>
+              <th>Wrong</th>
+              <th>Accuracy</th>
+              <th>Marks</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${students.map(s=>`
+              <tr>
+                <td>${esc(s.studentName)}</td>
+                <td>${esc(s.className)}</td>
+                <td>${esc(s.loginId)}</td>
+                <td>${esc(s.practice)}</td>
+                <td>${esc(s.testResults)}</td>
+                <td>${esc(s.correct)}</td>
+                <td>${esc(s.wrong)}</td>
+                <td>${esc(s.accuracy)}%</td>
+                <td>${esc(s.marks)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `;
+
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+    w.focus();
+
+    setTimeout(()=>w.print(),400);
+
+    $('reportStatus').textContent=
+      'Student-wise PDF opened. Choose Save as PDF in the print window.';
+
+  }catch(e){
+    $('reportStatus').textContent=e.message;
+  }
+}
+function downloadStudentExcel(){
+  try{
+    const r=currentReport();
+    const students=r.students||[];
+
+    if(!students.length){
+      throw new Error('No student records found for the selected filters.');
+    }
+
+    const rows=[
+      ['Student','Class','Login ID','Practice','Test','Correct','Wrong','Accuracy','Marks'],
+      ...students.map(s=>[
+        s.studentName,
+        s.className,
+        s.loginId,
+        s.practice,
+        s.testResults,
+        s.correct,
+        s.wrong,
+        s.accuracy+'%',
+        s.marks
+      ])
+    ];
+
+    let xml='<?xml version="1.0"?>' +
+      '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" ' +
+      'xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">' +
+      '<Worksheet ss:Name="Student Performance"><Table>';
+
+    rows.forEach(row=>{
+      xml+=xmlRow(row);
+    });
+
+    xml+='</Table></Worksheet></Workbook>';
+
+    const blob=new Blob(
+      [xml],
+      {type:'application/vnd.ms-excel;charset=utf-8'}
+    );
+
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+
+    a.href=url;
+    a.download=
+      'Student_Wise_Performance_'+
+      (r.from||'All')+'_'+
+      (r.to||'Dates')+'.xls';
+
+    a.click();
+
+    URL.revokeObjectURL(url);
+
+    $('reportStatus').textContent=
+      'Student-wise Excel file downloaded successfully.';
+
+  }catch(e){
+    $('reportStatus').textContent=e.message;
+  }
+}
+
 function downloadExcel(){try{const r=currentReport(),t=totalsOf(r),sheets=[['Summary',[['School','CHILDREN’S GARDEN E.M HIGH SCHOOL'],['Report',reportTitle()],['From',r.from],['To',r.to],['Questions',t.questions],['Correct',t.correct],['Wrong',t.wrong],['Practice Attempts',t.practice],['Test Results',t.tests],['Marks',t.marks]]],['Student Summary',[['Student','Class','Login ID','Practice','Test Results','Correct','Wrong','Accuracy','Marks'],...r.students.map(s=>[s.studentName,s.className,s.loginId,s.practice,s.testResults,s.correct,s.wrong,s.accuracy+'%',s.marks])]],['Question Attempts',[['Date','Student','Class','Section','Chapter','Question','Student Answer','Correct Answer','Result','Attempt'],...r.attempts.map(a=>[a.date,a.studentName,a.className,a.section,a.chapterNo,a.question,a.studentAnswer,a.correctAnswer,a.result,a.attemptNo])]],['Maths Results',[['Date','Student','Class','Topic','Total Questions','Correct','Wrong','Marks','Time Taken','Result ID'],...r.maths.map(m=>[m.date,m.studentName,m.className,m.topic,m.totalQuestions,m.correct,m.wrong,m.marks,m.timeTaken,m.resultId])]]];const cmp=comparisonFor(r);if(cmp)sheets.push(['Comparison',[['Metric','Selected Period','Previous Period','Change'],...cmp.rows]]);let xml='<?xml version="1.0"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">';sheets.forEach(([name,rows])=>{xml+='<Worksheet ss:Name="'+name+'"><Table>'+rows.map(xmlRow).join('')+'</Table></Worksheet>'});xml+='</Workbook>';const blob=new Blob([xml],{type:'application/vnd.ms-excel;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='Number_Garden_Performance_'+(r.from||'All')+'_'+(r.to||'Dates')+'.xls';a.click();URL.revokeObjectURL(url);$('reportStatus').textContent='Excel workbook downloaded with Summary, Student Summary, Question Attempts, Maths Results and (when applicable) Comparison sheets.'}catch(e){$('reportStatus').textContent=e.message}}
 $('reportPeriod').addEventListener('change',()=>{setReportDates();try{updateComparison(currentReport())}catch(e){$('reportStatus').textContent=e.message}});$('applyReportBtn').addEventListener('click',()=>{try{const r=currentReport();updateComparison(r);$('reportStatus').textContent='Report filters applied: '+r.attempts.length+' question attempts and '+r.maths.length+' maths results.'}catch(e){$('reportStatus').textContent=e.message}});$('pdfReportBtn').addEventListener('click',downloadPdf);$('excelReportBtn').addEventListener('click',downloadExcel);$('studentPdfBtn').addEventListener('click',downloadStudentPDF);$('studentExcelBtn').addEventListener('click',downloadStudentExcel);$('sectionFilter').addEventListener('change',()=>{
   updateStudentFilter();
