@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -14,7 +13,26 @@
 <section id="loginPanel" class="panel login"><h2>🔐 Teacher Login</h2><p class="muted">Enter the school’s private Teacher Dashboard PIN.</p><input id="teacherPin" class="field" type="password" placeholder="Teacher Dashboard PIN" style="width:100%;margin:10px 0"><button id="loginBtn" class="btn" style="width:100%">Open Dashboard</button><p id="loginError" class="error"></p><p class="note">Student records are protected by a PIN checked on the school server.</p></section>
 <section id="dashboard" class="hidden">
 <div class="panel topbar"><div><h2 style="margin:0">Student Performance Overview</h2><span id="generated" class="muted" style="font-size:12px"></span></div><button class="btn alt" id="refreshBtn">↻ Refresh Data</button></div>
-<div class="panel"><div class="filters"><select id="classFilter"><option value="all">All Classes</option></select><select id="studentFilter"><option value="all">All Students</option></select><input id="searchFilter" class="field" placeholder="Search student / Login ID"></div></div>
+<div class="panel"><div class="filters">
+
+<select id="classFilter">
+  <option value="all">All Classes</option>
+</select>
+
+<select id="sectionFilter">
+  <option value="all">All Sections</option>
+  <option value="A">A Group</option>
+  <option value="B">B Group</option>
+  <option value="G">G Group</option>
+</select>
+
+<select id="studentFilter">
+  <option value="all">All Students</option>
+</select>
+
+<input id="searchFilter" class="field" placeholder="Search student / Login ID">
+
+</div></div>
 <section class="panel"><div class="sectionhead"><h2>📊 Student Result Reports</h2><span class="muted">Day-wise · Weekly · Monthly · Complete</span></div><div class="report-grid"><div><label for="reportPeriod" class="note">Report Period</label><select id="reportPeriod" class="field"><option value="day">Day-wise</option><option value="week">Weekly</option><option value="month">Monthly</option><option value="custom">Custom Date Range</option><option value="all">Complete Records</option></select></div><div><label for="reportFrom" class="note">From Date</label><input id="reportFrom" class="field" type="date"></div><div><label for="reportTo" class="note">To Date</label><input id="reportTo" class="field" type="date"></div><div><label class="note">Report Scope</label><div id="reportScope" class="field" style="background:#f7faff">Current class / student filters</div></div></div><div class="report-actions"><button class="btn blue" id="pdfReportBtn">⬇ Download PDF</button><button class="btn orange" id="excelReportBtn">⬇ Download Excel</button><button class="btn alt" id="applyReportBtn">Apply Dates</button></div><p class="report-help" id="reportStatus">Choose a period and dates. Current class and student filters will be applied to the report.</p><div id="comparisonWrap" class="hidden" style="margin-top:14px"><h3>📈 Previous Period Comparison</h3><div class="tablewrap"><table style="min-width:520px"><thead><tr><th>Metric</th><th>Selected Period</th><th>Previous Period</th><th>Change</th></tr></thead><tbody id="comparisonRows"></tbody></table></div></div></section>
 <div class="cards"><div class="metric blue"><small>Students</small><strong id="mStudents">0</strong></div><div class="metric"><small>Questions Attempted</small><strong id="mQuestions">0</strong></div><div class="metric green"><small>Correct Answers</small><strong id="mCorrect">0</strong></div><div class="metric red"><small>Wrong Answers</small><strong id="mWrong">0</strong></div></div>
 <div class="cards"><div class="metric orange"><small>Practice Attempts</small><strong id="mPractice">0</strong></div><div class="metric blue"><small>Test Attempts</small><strong id="mTests">0</strong></div><div class="metric green"><small>Accuracy</small><strong id="mAccuracy">0%</strong></div><div class="metric"><small>Total Marks</small><strong id="mMarks">0</strong></div></div>
