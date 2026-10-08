@@ -89,7 +89,21 @@ const acts=(dashboardData.chapterActivity||[]).filter(a=>(cls==='all'||String(a.
 function isoToday(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function isoDate(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 function setReportDates(){const mode=$('reportPeriod').value,now=new Date();let from=new Date(now),to=new Date(now);if(mode==='week'){const day=(now.getDay()+6)%7;from.setDate(now.getDate()-day)}else if(mode==='month'){from=new Date(now.getFullYear(),now.getMonth(),1)}else if(mode==='all'){from=new Date(2000,0,1)}else if(mode==='custom'){if(!$('reportFrom').value)$('reportFrom').value=isoToday();if(!$('reportTo').value)$('reportTo').value=isoToday();return}$('reportFrom').value=isoDate(from);$('reportTo').value=isoDate(to)}
-function reportSelection(){const cls=$('classFilter').value,login=$('studentFilter').value,q=$('searchFilter').value.trim().toLowerCase();return (dashboardData.students||[]).filter(s=>(cls==='all'||String(s.className)===cls)&&(login==='all'||s.loginId===login)&&(!q||(s.studentName+' '+s.loginId+' '+s.rollNo).toLowerCase().includes(q)))}
+function reportSelection(){
+  const cls = $('classFilter').value;
+  const section = $('sectionFilter').value;
+  const login = $('studentFilter').value;
+  const q = $('searchFilter').value.trim().toLowerCase();
+
+  return (dashboardData.students || []).filter(s =>
+    (cls === 'all' || String(s.className) === cls) &&
+    (section === 'all' || String(s.section).toUpperCase() === section) &&
+    (login === 'all' || s.loginId === login) &&
+    (!q || (s.studentName + ' ' + s.loginId + ' ' + s.rollNo)
+      .toLowerCase()
+      .includes(q))
+  );
+}
 function dateInRange(key,from,to){return !!key&&(!from||key>=from)&&(!to||key<=to)}
 function buildReport(from,to){const chosen=reportSelection(),ids=new Set(chosen.map(s=>s.loginId));const attempts=(dashboardData.reportAttempts||[]).filter(a=>ids.has(a.loginId)&&dateInRange(a.dateKey,from,to));const maths=(dashboardData.reportMaths||[]).filter(m=>ids.has(m.loginId)&&dateInRange(m.dateKey,from,to));const summary=chosen.map(s=>{const aa=attempts.filter(a=>a.loginId===s.loginId),mm=maths.filter(m=>m.loginId===s.loginId);const correct=aa.filter(a=>String(a.result).toLowerCase()==='correct').length,wrong=aa.filter(a=>String(a.result).toLowerCase()==='wrong').length;return {studentName:s.studentName,className:s.className,loginId:s.loginId,practice:aa.filter(a=>String(a.section).toLowerCase()==='practice').length,testResults:new Set(aa.filter(a=>String(a.section).toLowerCase()==='test'&&a.resultId).map(a=>a.resultId)).size,correct,wrong,accuracy:aa.length?Math.round(correct/aa.length*100):0,marks:mm.reduce((n,m)=>n+(Number(m.marks)||0),0)}});return {from,to,students:summary,attempts,maths}}
 function totalsOf(r){return {questions:r.attempts.length,correct:r.attempts.filter(a=>String(a.result).toLowerCase()==='correct').length,wrong:r.attempts.filter(a=>String(a.result).toLowerCase()==='wrong').length,practice:r.attempts.filter(a=>String(a.section).toLowerCase()==='practice').length,tests:new Set(r.attempts.filter(a=>String(a.section).toLowerCase()==='test'&&a.resultId).map(a=>a.resultId)).size,marks:r.maths.reduce((n,m)=>n+(Number(m.marks)||0),0)}}
