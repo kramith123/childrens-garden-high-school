@@ -870,8 +870,32 @@ document.querySelectorAll('.step[data-step]').forEach(btn=>{
   btn.addEventListener('click',()=>shapeGo(btn.dataset.step));
 });
 
+
+ // Route every Chapter 1 step button through the Question Bank flow.
+document.querySelectorAll('.step[data-step]').forEach(btn=>{
+  btn.addEventListener('click',()=>shapeGo(btn.dataset.step));
+});
+
+// Connect the Student Login button.
+const loginButton = document.getElementById('loginBtn');
+const loginInput = document.getElementById('loginIdInput');
+
+if (loginButton) {
+  loginButton.addEventListener('click', studentLogin);
+}
+
+if (loginInput) {
+  loginInput.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      studentLogin();
+    }
+  });
+}
+
 // Keep the old built-in Chapter 1 test disabled; only active Sheet questions are used.
 updateProgress();
 </script></body></html>
+
 
 
