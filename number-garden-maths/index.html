@@ -1045,7 +1045,7 @@ function renderSpeedTest(){
       console.log("Speed Maths image URL:", q.questionId, q.imageUrl);
       const imageHtml = imageUrl
         ? '<div class="speed-question-image">' +
-          '<img src="' + escapeHtml(imageUrl) +
+          '<img src="' + imageUrl +
           '" alt="Question ' + (i + 1) + ' image" ' +
           'loading="lazy" referrerpolicy="no-referrer" ' +
           'onerror="this.parentElement.style.display=\'none\'">' +
