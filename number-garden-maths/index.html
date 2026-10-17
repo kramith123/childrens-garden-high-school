@@ -15,6 +15,59 @@ main{max-width:1050px;margin:20px auto;padding:0 14px 38px}.welcome,.progress,.p
 .panel{min-height:370px;padding:21px}.panel h2{margin:0 0 8px;font-size:23px}.topicbanner{border-radius:13px;padding:11px 14px;margin:-2px 0 15px;font-weight:800}.lesson{border-radius:15px;padding:16px;margin:13px 0;text-align:center;background:#f4f8ff;border:1px solid #e5edf8}.pictures{font-size:29px;line-height:1.75;overflow-wrap:anywhere}.sum{font-size:clamp(32px,7vw,48px);font-weight:900;color:#203b62;margin:8px}.explain{max-width:690px;margin:8px auto;line-height:1.6}.actions{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin-top:16px}.btn{border:0;border-radius:11px;padding:11px 17px;font-size:15px;font-weight:800;cursor:pointer}.primary{background:#23845b;color:white}.secondary{background:#edf3f8;color:#173d69}.question{background:#f8fafc;border:1px solid var(--line);padding:18px;border-radius:14px;margin:14px 0;text-align:center}.answer{width:125px;padding:10px;border:2px solid #cbd5e1;border-radius:10px;font-size:24px;text-align:center}.feedback{min-height:25px;margin-top:11px;font-weight:800}.choices{display:flex;justify-content:center;gap:9px;flex-wrap:wrap}.choice{font-size:22px;font-weight:800;padding:10px 18px;background:white;border:2px solid #dce5ed;border-radius:11px;cursor:pointer}.choice:disabled{opacity:.75;cursor:default}.smallnote{font-size:12px;color:var(--muted);text-align:center;margin-top:12px}.bank-image{display:block;max-width:min(100%,360px);max-height:230px;object-fit:contain;margin:12px auto;border-radius:12px}.bank-question{background:#f8fafc;border:1px solid var(--line);padding:18px;border-radius:14px;margin:14px 0;text-align:center}
 table{border-collapse:collapse;margin:12px auto;background:white}td,th{border:1px solid #9aa8b7;padding:8px 15px;text-align:center;font-weight:800}.place{background:#e8f1fa}.blockrow{font-size:20px;letter-spacing:2px;margin:8px}.workgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.storypic{background:#fff8e9;border:1px solid #f4e4c7;border-radius:14px;padding:12px;margin-bottom:12px}.baseblocks{display:grid;gap:8px;background:#f1f7ff;border-radius:13px;padding:12px}.baseblocks>div{background:white;border-radius:10px;padding:8px}.pv-row{background:white;border-radius:10px;padding:10px;margin:5px 0;text-align:left}.pv-items{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:9px}.ten-rod{display:inline-flex;flex-direction:column;width:23px;border:2px solid #198b61;border-radius:4px;overflow:hidden;background:#45c58b}.ten-rod i{height:7px;border-bottom:1px solid #d5ffeb}.ten-rod i:last-child{border-bottom:0}.one-cube{width:22px;height:22px;background:linear-gradient(135deg,#62a8ff,#2870cf);border:2px solid #2367b8;border-radius:4px;display:inline-block}.pv-label{font-size:13px;color:#40536b;font-weight:700;margin-right:4px}.picture-groups,.story-groups{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin:10px auto}.picture-set,.story-group{background:#fff;border:1px solid #e2eaf2;border-radius:12px;padding:10px;max-width:100%}.picture-set small,.story-group small{display:block;color:#53657b;font-weight:700}.story-icons{font-size:27px;line-height:1.7;overflow-wrap:anywhere;max-width:330px}.plus{font-size:24px;color:#2878bd}.workcard{border-radius:13px;padding:12px;text-align:center;border:1px solid var(--line);background:white}.workcard b{font-size:20px}.footer{text-align:center;color:#8290a2;font-size:12px;margin:18px}.chapter-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:16px 0}.chapter-card{border:2px solid #dce7ef;border-radius:14px;padding:14px;background:#fff;text-align:left;display:flex;gap:10px;align-items:center;width:100%;color:var(--ink)}.chapter-card.unlocked{border-color:#29976c;cursor:pointer;background:#f1fbf5}.chapter-card.locked{opacity:.72;background:#f4f6f8;cursor:not-allowed}.chapter-no{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#e9f2ff;color:#174a78;font-weight:900;flex:none}.chapter-info{flex:1;min-width:0}.chapter-info b{display:block}.chapter-info small{display:block;margin-top:4px;color:var(--muted)}.chapter-status{font-size:12px;font-weight:900;white-space:nowrap;color:#23845b}.locked .chapter-status{color:#778394}.chapter-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}@media(max-width:570px){.chapter-grid{grid-template-columns:1fr}}
 @media(max-width:570px){.school{font-size:clamp(15px,4vw,19px);letter-spacing:0}.brand{font-size:clamp(24px,7vw,31px)}.welcome{align-items:flex-start;flex-direction:column}.topics{gap:7px}.topic{padding:11px;font-size:13px}.topic small{font-size:11px}.steps{gap:5px}.step{font-size:12px}.step span{font-size:19px}.panel{padding:15px}.workgrid{grid-template-columns:1fr}td,th{padding:7px 10px}}
+
+/* Speed Maths - Child Friendly Question Design */
+#speedPanel .question {
+  padding: 24px;
+  margin: 18px 0;
+  border-radius: 18px;
+}
+
+#speedPanel .question h3 {
+  font-size: 27px;
+  line-height: 1.5;
+  margin: 16px 0 22px;
+  color: #173d69;
+}
+
+#speedPanel .question .smallnote {
+  font-size: 15px;
+}
+
+#speedPanel .choices {
+  gap: 14px;
+}
+
+#speedPanel .choice {
+  min-width: 76px;
+  min-height: 62px;
+  padding: 14px 22px;
+  font-size: 25px;
+  border-radius: 14px;
+  border-width: 2px;
+}
+
+#speedPanel .choice:active {
+  transform: scale(0.97);
+}
+
+@media (max-width: 570px) {
+  #speedPanel .question {
+    padding: 18px;
+  }
+
+  #speedPanel .question h3 {
+    font-size: 24px;
+  }
+
+  #speedPanel .choice {
+    min-width: 64px;
+    min-height: 56px;
+    padding: 12px 18px;
+    font-size: 23px;
+  }
+}
+
 </style></head>
 <body>
 <header><div class="school">CHILDREN’S GARDEN E.M HIGH SCHOOL</div><div class="brand">🌱 NUMBER GARDEN</div><div class="sub">MATHS LEARNING WORLD</div><div class="tag">Learn • Explore • Practise • Achieve</div></header>
