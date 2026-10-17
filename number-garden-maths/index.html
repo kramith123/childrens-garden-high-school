@@ -713,12 +713,14 @@ async function studentLogin(){
     CENTRAL_API='https://script.google.com/macros/s/AKfycbx5Ic7kJ-bbkcBzRkr5-ZIGyswSePn5wUvGoJcWMnAGh0hQ4fP2GLCYHgP0nJ42Mmmafg/exec';
   }else if(loginId.startsWith('cg5')){
     CENTRAL_API='https://script.google.com/macros/s/AKfycbwZXByvaTOBvB8y8DvQ6r9JRFP_dYQ4PD34rL4LxDpamk73TKJGtAD0fGibC34O-l6PMQ/exec';
-  }else{
-    err.textContent='Invalid Login ID.';
-    btn.disabled=false;
-    btn.textContent='Login & Start Maths →';
-    return;
-  }
+  }else if(loginId.startsWith('cg6')){
+  CENTRAL_API='https://script.google.com/macros/s/AKfycbwSwLzfitvIwTsNDS9TEm5oOFeDGEGF_O2pWaN3zmtvM6f8yQ_Gg-nucX-JCXyoqftXGQ/exec';
+}else{
+  err.textContent='Invalid Login ID.';
+  btn.disabled=false;
+  btn.textContent='Login & Start Maths →';
+  return;
+}
 
   try{
     const data=await apiCall({
