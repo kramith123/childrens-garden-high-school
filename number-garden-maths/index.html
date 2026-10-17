@@ -95,6 +95,35 @@ table{border-collapse:collapse;margin:12px auto;background:white}td,th{border:1p
 </section>
 <main id="mathsApp" style="display:none">
 <section class="welcome"><div><h1 id="studentWelcome">Welcome to Class 1 Maths!</h1><p id="chapterIntro">Learn addition with pictures, number blocks, stories and fun challenges.</p></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><div class="pill" id="studentClassPill">CLASS 1 · MATHS</div><button class="btn secondary" type="button" onclick="backToChapters()">← Chapters</button><button class="btn secondary" type="button" onclick="studentLogout()">Logout</button></div></section>
+  
+<section id="speedHome" class="panel" style="display:none;background:#e8f6ff;border:2px solid #b8dcef;border-radius:20px;padding:20px">
+  <div style="text-align:center;padding:8px 0 18px;border-bottom:1px solid #b8dcef">
+    <h1 style="color:#16885e;margin:0;font-size:30px">🌱 Number Garden</h1>
+    <h2 style="color:#174a7e;margin:8px 0">⚡ SPEED MATHS</h2>
+    <p style="color:#365b7b;margin:8px 0;font-size:17px">Structured Mental Maths Practice</p>
+    <p style="color:#174a7e;margin:14px 0 0">Think Fast • Practise Daily • Shine Bright!</p>
+  </div>
+
+  <div style="display:flex;gap:16px;align-items:center;padding:20px 0">
+    <div style="font-size:65px;background:white;border-radius:16px;padding:12px">🚀</div>
+    <div>
+      <h2 style="color:#174a7e;margin:0 0 8px">Speed Maths</h2>
+      <h3 style="color:#16885e;margin:0 0 8px">Think Fast • Solve Smart!</h3>
+      <p style="color:#365b7b;margin:0">Quick maths challenges with a timer.</p>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px">
+    <div style="background:white;border-radius:12px;padding:18px 5px;text-align:center;color:#174a7e">◷<br><b>5–15 Min</b></div>
+    <div style="background:white;border-radius:12px;padding:18px 5px;text-align:center;color:#174a7e">◎<br><b>Fun Tests</b></div>
+    <div style="background:white;border-radius:12px;padding:18px 5px;text-align:center;color:#174a7e">🏆<br><b>Earn Stars</b></div>
+  </div>
+
+  <button class="btn primary" type="button" style="width:100%;background:#19885f" onclick="openSpeedMaths()">▶ Let's Play Speed Maths!</button>
+
+  <button class="btn secondary" type="button" style="width:100%;margin-top:10px" onclick="showRegularMathsChapters()">📚 Regular Maths Chapters</button>
+</section>
+
 <section id="chapterBrowser" class="panel" style="display:none;min-height:0"><div class="chapter-head"><div><h2>📚 Choose Your Chapter</h2><p class="hint">All chapters are shown. Open the chapters unlocked by your teacher.</p></div><span class="pill" id="chapterClassLabel">CLASS 1</span></div><div id="chapterMessage" class="hint" role="status"></div><div id="chapterList" class="chapter-grid"></div>
 <div class="lesson" style="text-align:left;margin-top:18px;border:2px solid #2878bd">
   <h2>⚡ Speed Maths</h2><p class="hint">Quick maths challenges with a timer. Your Speed Maths progress is tracked separately.</p>
@@ -989,6 +1018,12 @@ function openSpeedMaths(){
     .then(data=>{speedSettings=Array.isArray(data.settings)?data.settings:[];renderSpeedLevels();})
     .catch(err=>{panel.innerHTML='<h2>⚡ Speed Maths</h2><p class="hint">'+escapeHtml(err.message)+'</p><div class="actions"><button class="btn secondary" onclick="backToChapters()">← Back to Chapters</button></div>';});
 }
+
+function showRegularMathsChapters() {
+  document.getElementById('speedHome').style.display = 'none';
+  document.getElementById('chapterBrowser').style.display = 'block';
+}
+  
 function renderSpeedLevels(){
   const panel=speedPanel();
   const levels=speedSettings;
