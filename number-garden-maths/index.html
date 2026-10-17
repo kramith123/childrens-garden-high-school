@@ -68,6 +68,23 @@ table{border-collapse:collapse;margin:12px auto;background:white}td,th{border:1p
   }
 }
 
+
+/* Speed Maths Question Images */
+#speedPanel .speed-question-image {
+  margin: 14px auto 18px;
+  text-align: center;
+}
+
+#speedPanel .speed-question-image img {
+  display: block;
+  max-width: 100%;
+  width: auto;
+  max-height: 240px;
+  object-fit: contain;
+  margin: 0 auto;
+  border-radius: 12px;
+}
+
 </style></head>
 <body>
 <header><div class="school">CHILDREN’S GARDEN E.M HIGH SCHOOL</div><div class="brand">🌱 NUMBER GARDEN</div><div class="sub">MATHS LEARNING WORLD</div><div class="tag">Learn • Explore • Practise • Achieve</div></header>
@@ -1002,14 +1019,62 @@ async function startSpeedLevel(index){
   }
 }
 function formatSpeedTime(seconds){seconds=Math.max(0,Number(seconds)||0);return Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0');}
+
 function renderSpeedTest(){
-  const panel=speedPanel();
-  panel.innerHTML='<div class="chapter-head"><div><h2>⚡ '+escapeHtml(speedLevel.levelName)+'</h2><p class="hint">'+escapeHtml(speedLevel.topic)+' · Answer every question you can.</p></div><span class="pill">Time left: <span id="speedCountdown">'+formatSpeedTime(speedSecondsLeft)+'</span></span></div>'+
-    '<div id="speedQuestionList">'+speedQuestions.map((q,i)=>{
-      const opts=[['A',q.optionA],['B',q.optionB],['C',q.optionC],['D',q.optionD]].filter(x=>x[1]!==''&&x[1]!=null);
-      return '<div class="question" style="text-align:left"><p class="smallnote">Question '+(i+1)+' of '+speedQuestions.length+'</p><h3>'+escapeHtml(q.question)+'</h3><div class="choices">'+opts.map(o=>'<button type="button" class="choice" data-q="'+escapeHtml(q.questionId)+'" data-a="'+o[0]+'" onclick="chooseSpeedAnswer(this)">'+escapeHtml(o[1])+'</button>').join('')+'</div></div>';
-    }).join('')+'</div><div class="actions"><button class="btn primary" id="speedFinishBtn" onclick="finishSpeedTest(false)">Finish Test & Submit</button><button class="btn secondary" onclick="cancelSpeedTest()">Exit Test</button></div><p class="smallnote">The test submits automatically when the timer reaches zero.</p>';
+  const panel = speedPanel();
+
+  panel.innerHTML =
+    '<div class="chapter-head">' +
+      '<div><h2>⚡ ' + escapeHtml(speedLevel.levelName) + '</h2>' +
+      '<p class="hint">' + escapeHtml(speedLevel.topic) +
+      ' · Answer every question you can.</p></div>' +
+      '<span class="pill">Time left: <span id="speedCountdown">' +
+      formatSpeedTime(speedSecondsLeft) + '</span></span>' +
+    '</div>' +
+
+    '<div id="speedQuestionList">' +
+    speedQuestions.map((q, i) => {
+      const opts = [
+        ['A', q.optionA],
+        ['B', q.optionB],
+        ['C', q.optionC],
+        ['D', q.optionD]
+      ].filter(x => x[1] !== '' && x[1] != null);
+
+      const imageUrl = String(q.imageUrl || '').trim();
+
+      const imageHtml = imageUrl
+        ? '<div class="speed-question-image">' +
+          '<img src="' + escapeHtml(imageUrl) +
+          '" alt="Question ' + (i + 1) + ' image" ' +
+          'loading="lazy" referrerpolicy="no-referrer" ' +
+          'onerror="this.parentElement.style.display=\'none\'">' +
+          '</div>'
+        : '';
+
+      return '<div class="question" style="text-align:left">' +
+        '<p class="smallnote">Question ' + (i + 1) +
+        ' of ' + speedQuestions.length + '</p>' +
+        imageHtml +
+        '<h3>' + escapeHtml(q.question) + '</h3>' +
+        '<div class="choices">' +
+        opts.map(o =>
+          '<button type="button" class="choice" data-q="' +
+          escapeHtml(q.questionId) + '" data-a="' + o[0] +
+          '" onclick="chooseSpeedAnswer(this)">' +
+          escapeHtml(o[1]) + '</button>'
+        ).join('') +
+        '</div></div>';
+    }).join('') +
+    '</div>' +
+
+    '<div class="actions">' +
+      '<button class="btn primary" id="speedFinishBtn" onclick="finishSpeedTest(false)">Finish Test & Submit</button>' +
+      '<button class="btn secondary" onclick="cancelSpeedTest()">Exit Test</button>' +
+    '</div>' +
+    '<p class="smallnote">The test submits automatically when the timer reaches zero.</p>';
 }
+
 function chooseSpeedAnswer(button){
   if(speedSubmitting)return;
   const qid=button.dataset.q, letter=button.dataset.a;
