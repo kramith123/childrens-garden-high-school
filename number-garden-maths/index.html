@@ -25,7 +25,14 @@ table{border-collapse:collapse;margin:12px auto;background:white}td,th{border:1p
 </section>
 <main id="mathsApp" style="display:none">
 <section class="welcome"><div><h1 id="studentWelcome">Welcome to Class 1 Maths!</h1><p id="chapterIntro">Learn addition with pictures, number blocks, stories and fun challenges.</p></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><div class="pill" id="studentClassPill">CLASS 1 · MATHS</div><button class="btn secondary" type="button" onclick="backToChapters()">← Chapters</button><button class="btn secondary" type="button" onclick="studentLogout()">Logout</button></div></section>
-<section id="chapterBrowser" class="panel" style="display:none;min-height:0"><div class="chapter-head"><div><h2>📚 Choose Your Chapter</h2><p class="hint">All chapters are shown. Open the chapters unlocked by your teacher.</p></div><span class="pill" id="chapterClassLabel">CLASS 1</span></div><div id="chapterMessage" class="hint" role="status"></div><div id="chapterList" class="chapter-grid"></div></section><section id="learningArea" style="display:none"><section class="progress"><div class="progressline"><span id="progressTitle">Your learning journey</span><span id="progressText">0 of 4 steps completed</span></div><div class="bar"><div class="fill" id="fill"></div></div></section>
+<section id="chapterBrowser" class="panel" style="display:none;min-height:0"><div class="chapter-head"><div><h2>📚 Choose Your Chapter</h2><p class="hint">All chapters are shown. Open the chapters unlocked by your teacher.</p></div><span class="pill" id="chapterClassLabel">CLASS 1</span></div><div id="chapterMessage" class="hint" role="status"></div><div id="chapterList" class="chapter-grid"></div>
+<div class="lesson" style="text-align:left;margin-top:18px;border:2px solid #2878bd">
+  <h2>⚡ Speed Maths</h2><p class="hint">Quick maths challenges with a timer. Your Speed Maths progress is tracked separately.</p>
+  <div class="actions" style="justify-content:flex-start"><button class="btn primary" type="button" onclick="openSpeedMaths()">Open Speed Maths →</button></div>
+  <p id="speedHomeMessage" class="hint" role="status"></p>
+</div></section>
+<section id="speedPanel" class="panel" style="display:none;min-height:0"></section>
+<section id="learningArea" style="display:none"><section class="progress"><div class="progressline"><span id="progressTitle">Your learning journey</span><span id="progressText">0 of 4 steps completed</span></div><div class="bar"><div class="fill" id="fill"></div></div></section>
 <div class="topics">
 <button class="topic active" style="--topic:#d97720;--tint:#fff2df" data-topic="picture"><span class="topicicon">🍊</span>Picture Addition<small>Add groups • Number line • Picture sums</small></button>
 <button class="topic" style="--topic:#2878bd;--tint:#e9f4ff" data-topic="twodigit"><span class="topicicon">🔢</span>2-digit Addition<small>Tens and ones • Blocks • Vertical sums</small></button>
@@ -664,6 +671,8 @@ function shapePracticeAnswer(encoded){
  else{shapeAttempts++;fb.textContent=shapeAttempts===1?'Good try! Look carefully and try once more.':'Not quite. Think about the shape and try again.';fb.style.color='#b45309';}
 }
 function backToChapters(){
+  clearInterval(speedTimerHandle);
+  const sp=document.getElementById('speedPanel');if(sp)sp.style.display='none';
   if(activeClock){writePending();pauseClock();}
   finishTrackedActivity();
   document.getElementById('learningArea').style.display='none';
@@ -878,6 +887,111 @@ document.querySelectorAll('.step[data-step]').forEach(btn=>{
   btn.addEventListener('click',()=>shapeGo(btn.dataset.step));
 });
 
+
+// ---------------- SPEED MATHS (separate from regular Maths tracking) ----------------
+const SPEED_API = 'https://script.google.com/macros/s/AKfycbxYPf8oz9ne_x5IEgjzitVv9FPzfyA6H9YtMvutmKr4iEE5fGoRynaNz1ClX8E8QYOO/exec';
+let speedSettings=[], speedQuestions=[], speedAnswers={}, speedLevel=null;
+let speedStartedAt=0, speedTimerHandle=null, speedSecondsLeft=0, speedSubmitting=false;
+
+function speedApiCall(params){
+  return new Promise((resolve,reject)=>{
+    const cb='speedcb_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    const script=document.createElement('script');
+    let finished=false;
+    const timer=setTimeout(()=>{if(finished)return;finished=true;cleanup();reject(new Error('Speed Maths connection timed out. Please try again.'));},25000);
+    function cleanup(){clearTimeout(timer);delete window[cb];script.remove();}
+    window[cb]=(res)=>{if(finished)return;finished=true;cleanup();if(res&&res.success)resolve(res);else reject(new Error(res&&res.message||'Speed Maths request failed.'));};
+    script.onerror=()=>{if(finished)return;finished=true;cleanup();reject(new Error('Could not connect to Speed Maths server.'));};
+    script.src=SPEED_API+'?'+new URLSearchParams({...params,callback:cb,_:Date.now()}).toString();
+    document.body.appendChild(script);
+  });
+}
+function speedPanel(){return document.getElementById('speedPanel');}
+function openSpeedMaths(){
+  if(!currentStudent||!currentSessionId){alert('Please log in first.');return;}
+  document.getElementById('chapterBrowser').style.display='none';
+  document.getElementById('learningArea').style.display='none';
+  document.querySelector('.topics').style.display='none';
+  const panel=speedPanel();panel.style.display='block';
+  panel.innerHTML='<h2>⚡ Speed Maths</h2><p class="hint">Loading your available levels...</p>';
+  speedApiCall({action:'getSpeedSettings',className:String(currentStudent.className)})
+    .then(data=>{speedSettings=Array.isArray(data.settings)?data.settings:[];renderSpeedLevels();})
+    .catch(err=>{panel.innerHTML='<h2>⚡ Speed Maths</h2><p class="hint">'+escapeHtml(err.message)+'</p><div class="actions"><button class="btn secondary" onclick="backToChapters()">← Back to Chapters</button></div>';});
+}
+function renderSpeedLevels(){
+  const panel=speedPanel();
+  const levels=speedSettings;
+  panel.innerHTML='<div class="chapter-head"><div><h2>⚡ Speed Maths Levels</h2><p class="hint">Class '+escapeHtml(currentStudent.className)+' · Choose an unlocked level.</p></div><button class="btn secondary" onclick="backToChapters()">← Chapters</button></div>'+
+    (levels.length?'<div class="chapter-grid">'+levels.map((l,i)=>'<button class="chapter-card unlocked" type="button" onclick="startSpeedLevel('+i+')"><span class="chapter-no">'+escapeHtml(l.levelId)+'</span><span class="chapter-info"><b>'+escapeHtml(l.levelName)+'</b><small>'+escapeHtml(l.topic)+' · '+Number(l.timeLimitMinutes)+' min · '+Number(l.totalQuestions)+' questions</small></span><span class="chapter-status">🔓 OPEN</span></button>').join('')+'</div>':'<div class="lesson"><p>No unlocked Speed Maths levels are available for this class.</p></div>');
+}
+async function startSpeedLevel(index){
+  speedLevel=speedSettings[index];
+  const panel=speedPanel();
+  panel.innerHTML='<h2>Loading questions...</h2><p class="hint">Please wait.</p>';
+  try{
+    const data=await speedApiCall({action:'getSpeedQuestions',className:String(currentStudent.className),levelId:String(speedLevel.levelId)});
+    speedQuestions=Array.isArray(data.questions)?data.questions:[];
+    if(!speedQuestions.length)throw new Error('No active questions are available for this level.');
+    speedAnswers={};speedSubmitting=false;
+    speedSecondsLeft=Math.max(1,Number(data.timeLimitMinutes||speedLevel.timeLimitMinutes)*60);
+    speedStartedAt=Date.now();
+    renderSpeedTest();
+    clearInterval(speedTimerHandle);
+    speedTimerHandle=setInterval(()=>{
+      speedSecondsLeft--;
+      const timerEl=document.getElementById('speedCountdown');
+      if(timerEl)timerEl.textContent=formatSpeedTime(speedSecondsLeft);
+      if(speedSecondsLeft<=0)finishSpeedTest(true);
+    },1000);
+  }catch(err){
+    panel.innerHTML='<h2>⚡ Speed Maths</h2><p class="hint">'+escapeHtml(err.message)+'</p><div class="actions"><button class="btn secondary" onclick="renderSpeedLevels()">← Levels</button></div>';
+  }
+}
+function formatSpeedTime(seconds){seconds=Math.max(0,Number(seconds)||0);return Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0');}
+function renderSpeedTest(){
+  const panel=speedPanel();
+  panel.innerHTML='<div class="chapter-head"><div><h2>⚡ '+escapeHtml(speedLevel.levelName)+'</h2><p class="hint">'+escapeHtml(speedLevel.topic)+' · Answer every question you can.</p></div><span class="pill">Time left: <span id="speedCountdown">'+formatSpeedTime(speedSecondsLeft)+'</span></span></div>'+
+    '<div id="speedQuestionList">'+speedQuestions.map((q,i)=>{
+      const opts=[['A',q.optionA],['B',q.optionB],['C',q.optionC],['D',q.optionD]].filter(x=>x[1]!==''&&x[1]!=null);
+      return '<div class="question" style="text-align:left"><p class="smallnote">Question '+(i+1)+' of '+speedQuestions.length+'</p><h3>'+escapeHtml(q.question)+'</h3><div class="choices">'+opts.map(o=>'<button type="button" class="choice" data-q="'+escapeHtml(q.questionId)+'" data-a="'+o[0]+'" onclick="chooseSpeedAnswer(this)">'+escapeHtml(o[1])+'</button>').join('')+'</div></div>';
+    }).join('')+'</div><div class="actions"><button class="btn primary" id="speedFinishBtn" onclick="finishSpeedTest(false)">Finish Test & Submit</button><button class="btn secondary" onclick="cancelSpeedTest()">Exit Test</button></div><p class="smallnote">The test submits automatically when the timer reaches zero.</p>';
+}
+function chooseSpeedAnswer(button){
+  if(speedSubmitting)return;
+  const qid=button.dataset.q, letter=button.dataset.a;
+  speedAnswers[qid]=letter;
+  document.querySelectorAll('.choice[data-q="'+CSS.escape(qid)+'"]').forEach(b=>{b.style.background='white';b.style.borderColor='#dce5ed';});
+  button.style.background='#e9f4ff';button.style.borderColor='#2878bd';
+}
+function cancelSpeedTest(){
+  if(speedSubmitting)return;
+  clearInterval(speedTimerHandle);
+  speedPanel().innerHTML='<h2>Test exited</h2><p class="hint">This attempt was not submitted.</p><div class="actions"><button class="btn primary" onclick="renderSpeedLevels()">Back to Levels</button><button class="btn secondary" onclick="backToChapters()">Back to Chapters</button></div>';
+}
+async function finishSpeedTest(autoFinished){
+  if(speedSubmitting)return;
+  speedSubmitting=true;clearInterval(speedTimerHandle);
+  const panel=speedPanel();
+  panel.innerHTML='<h2>Submitting Speed Maths result...</h2><p class="hint">Please wait. Do not close this page.</p>';
+  try{
+    const elapsed=Math.max(0,Math.round((Date.now()-speedStartedAt)/1000));
+    const result=await speedApiCall({
+      action:'submitSpeedResult',
+      studentId:String(currentStudent.loginId||currentStudent.studentId||''),
+      studentName:String(currentStudent.studentName||'Student'),
+      className:String(currentStudent.className),
+      levelId:String(speedLevel.levelId),
+      answers:JSON.stringify(speedAnswers),
+      timeTakenSeconds:String(Math.min(elapsed,Number(speedLevel.timeLimitMinutes||5)*60))
+    });
+    panel.innerHTML='<h2>🏆 Speed Maths Completed!</h2><div class="lesson"><div class="sum">'+Number(result.score)+' / '+Number(result.totalMarks)+'</div><p><b>Correct:</b> '+result.correct+' · <b>Wrong:</b> '+result.wrong+' · <b>Unanswered:</b> '+result.unanswered+'</p><p><b>Accuracy:</b> '+result.accuracyPercent+'%</p><p><b>Time Taken:</b> '+formatSpeedTime(result.timeTakenSeconds)+'</p><p><b>Status:</b> '+(result.passed?'Passed':'Keep Practising')+'</p><p class="hint">Result saved to Speed_Results and Speed_Tracking.</p>'+(autoFinished?'<p class="hint">The time limit ended, so the test was submitted automatically.</p>':'')+'</div><div class="actions"><button class="btn primary" onclick="renderSpeedLevels()">Try Another Level</button><button class="btn secondary" onclick="backToChapters()">Back to Chapters</button></div>';
+  }catch(err){
+    speedSubmitting=false;
+    panel.innerHTML='<h2>Result could not be saved</h2><p class="hint">'+escapeHtml(err.message)+'</p><div class="actions"><button class="btn primary" onclick="finishSpeedTest('+Boolean(autoFinished)+')">Retry Submit</button><button class="btn secondary" onclick="renderSpeedLevels()">Back to Levels</button></div>';
+  }
+}
+// ---------------- END SPEED MATHS ----------------
+
 // Connect the Student Login button.
 const loginButton = document.getElementById('loginBtn');
 const loginInput = document.getElementById('loginIdInput');
@@ -898,6 +1012,3 @@ if (loginInput) {
 // Keep the old built-in Chapter 1 test disabled; only active Sheet questions are used.
 updateProgress();
 </script></body></html>
-
-
-
