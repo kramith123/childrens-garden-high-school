@@ -1066,7 +1066,7 @@ function openSpeedMaths(){
   speedApiCall({
     action:'getSpeedSettings',
     className:String(currentStudent.className),
-    studentId:String(currentStudent.id || currentStudent.studentId || currentStudent.admissionNo || '')
+    studentId:String(currentStudent.loginId || currentStudent.id || currentStudent.studentId || currentStudent.admissionNo || '')
   })
   .then(data=>{
     speedSettings=Array.isArray(data.settings)?data.settings:[];
@@ -1129,16 +1129,59 @@ function handleHeaderBack() {
   }
 }
 
-  
+
 function renderSpeedLevels(){
-  const panel=speedPanel();
-  const levels=speedSettings;
-  panel.innerHTML='<div class="chapter-head"><div><h2>⚡ Speed Maths Levels</h2><p class="hint">Class '+escapeHtml(currentStudent.className)+' · Choose an unlocked level.</p></div><button class="btn secondary" onclick="backToChapters()">← Chapters</button></div>'+
-    (levels.length?'<div class="chapter-grid">'+levels.map((l,i)=>'<button class="chapter-card unlocked" type="button" onclick="startSpeedLevel('+i+')"><span class="chapter-no">'+escapeHtml(l.levelId)+'</span><span class="chapter-info"><b>'+escapeHtml(l.levelName)+'</b><small>'+escapeHtml(l.topic)+' · '+Number(l.timeLimitMinutes)+' min · '+Number(l.totalQuestions)+' questions</small></span><span class="chapter-status">🔓 OPEN</span></button>').join('')+'</div>':'<div class="lesson"><p>No unlocked Speed Maths levels are available for this class.</p></div>');
+  const panel = speedPanel();
+  const levels = speedSettings;
+
+  panel.innerHTML =
+    '<div class="chapter-head">' +
+      '<div><h2>⚡ Speed Maths Levels</h2>' +
+      '<p class="hint">Class ' +
+      escapeHtml(currentStudent.className) +
+      ' · Complete each level to unlock the next.</p></div>' +
+      '<button class="btn secondary" onclick="backToChapters()">← Chapters</button>' +
+    '</div>' +
+
+    (levels.length
+      ? '<div class="chapter-grid">' +
+        levels.map((l, i) => {
+          const unlocked = l.unlocked === true;
+
+          return '<button class="chapter-card ' +
+            (unlocked ? 'unlocked' : 'locked') +
+            '" type="button" ' +
+            (unlocked ? 'onclick="startSpeedLevel(' + i + ')"' : 'disabled') +
+            '>' +
+              '<span class="chapter-no">' +
+                escapeHtml(l.levelId) +
+              '</span>' +
+              '<span class="chapter-info"><b>' +
+                escapeHtml(l.levelName) +
+              '</b><small>' +
+                escapeHtml(l.topic) + ' · ' +
+                Number(l.timeLimitMinutes) + ' min · ' +
+                Number(l.totalQuestions) + ' questions' +
+              '</small></span>' +
+              '<span class="chapter-status">' +
+                (unlocked ? '🔓 OPEN' : '🔒 LOCKED') +
+              '</span>' +
+          '</button>';
+        }).join('') +
+        '</div>'
+      : '<div class="lesson"><p>No Speed Maths levels are available for this class.</p></div>');
 }
+
+
 async function startSpeedLevel(index){
-  speedLevel=speedSettings[index];
-  const panel=speedPanel();
+  if (!speedSettings[index] || speedSettings[index].unlocked !== true) {
+    alert("Please complete the previous level to unlock this level.");
+    return;
+  }
+
+  speedLevel = speedSettings[index];
+  const panel = speedPanel();
+
   panel.innerHTML='<h2>Loading questions...</h2><p class="hint">Please wait.</p>';
   try{
     
@@ -1252,11 +1295,13 @@ async function finishSpeedTest(autoFinished){
     const elapsed=Math.max(0,Math.round((Date.now()-speedStartedAt)/1000));
     const result=await speedApiCall({
       action:'submitSpeedResult',
-      studentId:String(currentStudent.loginId||currentStudent.studentId||''),
+      studentId:String(currentStudent.loginId || currentStudent.id || currentStudent.studentId || currentStudent.admissionNo || ''),
       studentName:String(currentStudent.studentName||'Student'),
       className:String(currentStudent.className),
       levelId:String(speedLevel.levelId),
+      topicId:String(speedLevel.topicId || ''),
       answers:JSON.stringify(speedAnswers),
+
       timeTakenSeconds:String(Math.min(elapsed,Number(speedLevel.timeLimitMinutes||5)*60))
     });
     panel.innerHTML='<h2>🏆 Speed Maths Completed!</h2><div class="lesson"><div class="sum">'+Number(result.score)+' / '+Number(result.totalMarks)+'</div><p><b>Correct:</b> '+result.correct+' · <b>Wrong:</b> '+result.wrong+' · <b>Unanswered:</b> '+result.unanswered+'</p><p><b>Accuracy:</b> '+result.accuracyPercent+'%</p><p><b>Time Taken:</b> '+formatSpeedTime(result.timeTakenSeconds)+'</p><p><b>Status:</b> '+(result.passed?'Passed':'Keep Practising')+'</p><p class="hint">Result saved to Speed_Results and Speed_Tracking.</p>'+(autoFinished?'<p class="hint">The time limit ended, so the test was submitted automatically.</p>':'')+'</div><div class="actions"><button class="btn primary" onclick="renderSpeedLevels()">Try Another Level</button><button class="btn secondary" onclick="backToChapters()">Back to Chapters</button></div>';
