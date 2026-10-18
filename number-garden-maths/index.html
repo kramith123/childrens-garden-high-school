@@ -213,10 +213,13 @@ function apiCall(params){
 
 let availableChapters=[];
 let activeChapterNo=6, shapePracticeIndex=0, shapePracticeScore=0, shapeTestIndex=0, shapeTestScore=0, shapeAttempts=0;
+
 async function loadChapterList(){
-  document.getElementById('speedHome').style.display = 'none';
-  document.getElementById('chapterBrowser').style.display = 'block';
+  document.getElementById('speedHome').style.display='none';
+  document.getElementById('speedPanel').style.display='none';
+  document.getElementById('chapterBrowser').style.display='block';
   document.getElementById('learningArea').style.display='none';
+
   document.getElementById('chapterClassLabel').textContent='CLASS '+currentStudent.className;
   document.getElementById('chapterList').innerHTML='<p class="hint">Loading chapters...</p>';
   try{
@@ -228,6 +231,7 @@ async function loadChapterList(){
     document.getElementById('chapterMessage').textContent='Unable to load chapters: '+e.message;
   }
 }
+
 function renderChapterList(){
   const list=document.getElementById('chapterList');
   document.getElementById('chapterMessage').textContent=availableChapters.length?
@@ -1011,6 +1015,7 @@ function speedPanel(){return document.getElementById('speedPanel');}
 function openSpeedMaths(){
   if(!currentStudent||!currentSessionId){alert('Please log in first.');return;}
   document.getElementById('chapterBrowser').style.display='none';
+  document.getElementById('speedHome').style.display='none';
   document.getElementById('learningArea').style.display='none';
   document.querySelector('.topics').style.display='none';
   const panel=speedPanel();panel.style.display='block';
