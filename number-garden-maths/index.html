@@ -1141,7 +1141,20 @@ async function startSpeedLevel(index){
   const panel=speedPanel();
   panel.innerHTML='<h2>Loading questions...</h2><p class="hint">Please wait.</p>';
   try{
-    const data=await speedApiCall({action:'getSpeedQuestions',className:String(currentStudent.className),levelId:String(speedLevel.levelId)});
+    
+const data = await speedApiCall({
+  action: 'getSpeedQuestions',
+  className: String(currentStudent.className),
+  levelId: String(speedLevel.levelId),
+  studentId: String(
+    currentStudent.loginId ||
+    currentStudent.id ||
+    currentStudent.studentId ||
+    currentStudent.admissionNo ||
+    ''
+  )
+});
+
     speedQuestions=Array.isArray(data.questions)?data.questions:[];
     if(!speedQuestions.length)throw new Error('No active questions are available for this level.');
     speedAnswers={};speedSubmitting=false;
