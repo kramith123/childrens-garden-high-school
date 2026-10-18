@@ -1042,18 +1042,39 @@ function speedApiCall(params){
 }
 function speedPanel(){return document.getElementById('speedPanel');}
 
+
 function openSpeedMaths(){
-  if(!currentStudent||!currentSessionId){alert('Please log in first.');return;}
+  if(!currentStudent||!currentSessionId){
+    alert('Please log in first.');
+    return;
+  }
+
   document.getElementById('chapterBrowser').style.display='none';
   document.getElementById('speedHome').style.display='none';
   document.getElementById('learningArea').style.display='none';
   document.querySelector('.topics').style.display='none';
-  const panel=speedPanel();panel.style.display='block';
-  panel.innerHTML='<h2>⚡ Speed Maths</h2><p class="hint">Loading your available levels...</p>';
-  speedApiCall({action:'getSpeedSettings',className:String(currentStudent.className)})
-    .then(data=>{speedSettings=Array.isArray(data.settings)?data.settings:[];renderSpeedLevels();})
-    .catch(err=>{panel.innerHTML='<h2>⚡ Speed Maths</h2><p class="hint">'+escapeHtml(err.message)+'</p><div class="actions"><button class="btn secondary" onclick="backToChapters()">← Back to Chapters</button></div>';});
+
+  const panel=speedPanel();
+  panel.style.display='block';
+  panel.innerHTML='<h2>⚡ Speed Maths</h2><p class="hint">Loading your exams and levels...</p>';
+
+  speedApiCall({
+    action:'getSpeedSettings',
+    className:String(currentStudent.className),
+    studentId:String(currentStudent.id || currentStudent.studentId || currentStudent.admissionNo || '')
+  })
+  .then(data=>{
+    speedSettings=Array.isArray(data.settings)?data.settings:[];
+    renderSpeedLevels();
+  })
+  .catch(err=>{
+    panel.innerHTML=
+      '<h2>⚡ Speed Maths</h2><p class="hint">'+
+      escapeHtml(err.message)+
+      '</p><div class="actions"><button class="btn secondary" onclick="backToChapters()">← Back to Chapters</button></div>';
+  });
 }
+
 
 
 
