@@ -94,7 +94,20 @@ table{border-collapse:collapse;margin:12px auto;background:white}td,th{border:1p
 <button id="loginBtn" class="btn primary" style="width:100%">Login & Start Maths →</button><p id="loginError" style="color:#b91c1c;font-weight:bold;min-height:22px"></p>
 </section>
 <main id="mathsApp" style="display:none">
-<section class="welcome"><div><h1 id="studentWelcome">Welcome to Class 1 Maths!</h1><p id="chapterIntro">Learn addition with pictures, number blocks, stories and fun challenges.</p></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><div class="pill" id="studentClassPill">CLASS 1 · MATHS</div><button class="btn secondary" type="button" onclick="backToChapters()">← Chapters</button><button class="btn secondary" type="button" onclick="studentLogout()">Logout</button></div></section>
+
+<section class="welcome">
+  <div>
+    <h1 id="studentWelcome">Welcome to Class 1 Maths!</h1>
+    <p id="chapterIntro">Learn addition with pictures, number blocks, stories and fun challenges.</p>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <div class="pill" id="studentClassPill">CLASS 1 · MATHS</div>
+    <button id="headerBackBtn" class="btn secondary" type="button"
+      style="display:none" onclick="handleHeaderBack()">← Back to Home</button>
+    <button class="btn secondary" type="button" onclick="studentLogout()">Logout</button>
+  </div>
+</section>
+
   
 <section id="speedHome" class="panel" style="display:none;background:#e8f6ff;border:2px solid #b8dcef;border-radius:20px;padding:20px">
   <div style="text-align:center;padding:8px 0 18px;border-bottom:1px solid #b8dcef">
@@ -278,6 +291,12 @@ async function openChapter(chapterNo){
 
     document.getElementById('chapterBrowser').style.display='none';
     document.getElementById('learningArea').style.display='block';
+
+    const backBtn = document.getElementById('headerBackBtn');
+if (backBtn) {
+  backBtn.style.display = 'inline-block';
+  backBtn.textContent = '← Chapters';
+}
 
     document.getElementById('studentClassPill').textContent=
       'CLASS '+currentStudent.className+' · CHAPTER '+chapterNo;
@@ -1026,6 +1045,7 @@ function openSpeedMaths(){
 }
 
 
+
 function showSpeedHome() {
   document.getElementById('chapterBrowser').style.display = 'none';
   document.getElementById('learningArea').style.display = 'none';
@@ -1037,12 +1057,39 @@ function showSpeedHome() {
   if (speedPanel) speedPanel.style.display = 'none';
 
   document.getElementById('speedHome').style.display = 'block';
+
+  const backBtn = document.getElementById('headerBackBtn');
+  if (backBtn) backBtn.style.display = 'none';
 }
+
+
 
 
 function showRegularMathsChapters() {
   document.getElementById('speedHome').style.display = 'none';
+  document.getElementById('speedPanel').style.display = 'none';
+
+  const backBtn = document.getElementById('headerBackBtn');
+  if (backBtn) {
+    backBtn.style.display = 'inline-block';
+    backBtn.textContent = '← Back to Home';
+  }
+
   loadChapterList();
+}
+
+
+function handleHeaderBack() {
+  const learningArea = document.getElementById('learningArea');
+  const chapterBrowser = document.getElementById('chapterBrowser');
+
+  if (learningArea.style.display === 'block') {
+    backToChapters();
+  } else if (chapterBrowser.style.display === 'block') {
+    showSpeedHome();
+  } else {
+    showRegularMathsChapters();
+  }
 }
 
   
