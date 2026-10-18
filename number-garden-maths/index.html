@@ -214,7 +214,8 @@ function apiCall(params){
 let availableChapters=[];
 let activeChapterNo=6, shapePracticeIndex=0, shapePracticeScore=0, shapeTestIndex=0, shapeTestScore=0, shapeAttempts=0;
 async function loadChapterList(){
-  document.getElementById('chapterBrowser').style.display='block';
+  document.getElementById('speedHome').style.display = 'none';
+  document.getElementById('chapterBrowser').style.display = 'block';
   document.getElementById('learningArea').style.display='none';
   document.getElementById('chapterClassLabel').textContent='CLASS '+currentStudent.className;
   document.getElementById('chapterList').innerHTML='<p class="hint">Loading chapters...</p>';
@@ -856,7 +857,7 @@ async function studentLogin(){
     document.getElementById('loginGate').style.display='none';
     document.getElementById('mathsApp').style.display='block';
 
-    await loadChapterList();
+    showSpeedHome();
 
   }catch(e){
     err.textContent=e.message;
@@ -1019,10 +1020,26 @@ function openSpeedMaths(){
     .catch(err=>{panel.innerHTML='<h2>⚡ Speed Maths</h2><p class="hint">'+escapeHtml(err.message)+'</p><div class="actions"><button class="btn secondary" onclick="backToChapters()">← Back to Chapters</button></div>';});
 }
 
+
+function showSpeedHome() {
+  document.getElementById('chapterBrowser').style.display = 'none';
+  document.getElementById('learningArea').style.display = 'none';
+
+  const topics = document.querySelector('.topics');
+  if (topics) topics.style.display = 'none';
+
+  const speedPanel = document.getElementById('speedPanel');
+  if (speedPanel) speedPanel.style.display = 'none';
+
+  document.getElementById('speedHome').style.display = 'block';
+}
+
+
 function showRegularMathsChapters() {
   document.getElementById('speedHome').style.display = 'none';
-  document.getElementById('chapterBrowser').style.display = 'block';
+  loadChapterList();
 }
+
   
 function renderSpeedLevels(){
   const panel=speedPanel();
