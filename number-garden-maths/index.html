@@ -845,29 +845,28 @@ async function studentLogin(){
   btn.disabled=true;
   btn.textContent='Checking...';
 
-  // Select the correct Apps Script backend based on Login ID
-  
-  if(loginId.startsWith('cglkg')){
-  CENTRAL_API='https://script.google.com/macros/s/AKfycbwa8ich0p5HL3VNBSRGzh5HmYrPJDtVZdH25tr3nz1y66LOfhtsf872Hq_ruXbWc6Q/exec';
-  }else if(loginId.startsWith('cg1')){
-  if(loginId.startsWith('cg1')){
-    CENTRAL_API='https://script.google.com/macros/s/AKfycbxD6o5GMyV6T8ZeU1b0-hADy15xvstA9TvKyOI7oxbdA6e0RQXb38VlDxSoxtLdIYEsIA/exec';
-  }else if(loginId.startsWith('cg2')){
-    CENTRAL_API='https://script.google.com/macros/s/AKfycbw2A0xA13vQxf8GBt_WoHanxHtp-cRGUDOf0H1h1lS346mePtinHjlBEy6pKUibZ4xbWQ/exec';
-  }else if(loginId.startsWith('cg3')){
-    CENTRAL_API='https://script.google.com/macros/s/AKfycbytmK2HTzxQNvE62xrpLK965-_2Xn_5EKAq7ymW46YznvcNZ0Bzqe2m0FeUwlen63rw/exec';
-  }else if(loginId.startsWith('cg4')){
-    CENTRAL_API='https://script.google.com/macros/s/AKfycbx5Ic7kJ-bbkcBzRkr5-ZIGyswSePn5wUvGoJcWMnAGh0hQ4fP2GLCYHgP0nJ42Mmmafg/exec';
-  }else if(loginId.startsWith('cg5')){
-    CENTRAL_API='https://script.google.com/macros/s/AKfycbwZXByvaTOBvB8y8DvQ6r9JRFP_dYQ4PD34rL4LxDpamk73TKJGtAD0fGibC34O-l6PMQ/exec';
-  }else if(loginId.startsWith('cg6')){
-  CENTRAL_API='https://script.google.com/macros/s/AKfycbwSwLzfitvIwTsNDS9TEm5oOFeDGEGF_O2pWaN3zmtvM6f8yQ_Gg-nucX-JCXyoqftXGQ/exec';
-}else{
-  err.textContent='Invalid Login ID.';
-  btn.disabled=false;
-  btn.textContent='Login & Start Maths →';
-  return;
-}
+    // Select the correct Apps Script backend based on Login ID
+
+  if (loginId.startsWith('cglkg')) {
+    CENTRAL_API = 'https://script.google.com/macros/s/AKfycbwa8ich0p5HL3VNBSRGzh5HmYrPJDtVZdH25tr3nz1y66LOfhtsf872Hq_ruXbWc6Q/exec';
+  } else if (loginId.startsWith('cg1')) {
+    CENTRAL_API = 'https://script.google.com/macros/s/AKfycbxD6o5GMyV6T8ZeU1b0-hADy15xvstA9TvKyOI7oxbdA6e0RQXb38VlDxSoxtLdIYEsIA/exec';
+  } else if (loginId.startsWith('cg2')) {
+    CENTRAL_API = 'https://script.google.com/macros/s/AKfycbw2A0xA13vQxf8GBt_WoHanxHtp-cRGUDOf0H1h1lS346mePtinHjlBEy6pKUibZ4xbWQ/exec';
+  } else if (loginId.startsWith('cg3')) {
+    CENTRAL_API = 'https://script.google.com/macros/s/AKfycbytmK2HTzxQNvE62xrpLK965-_2Xn_5EKAq7ymW46YznvcNZ0Bzqe2m0FeUwlen63rw/exec';
+  } else if (loginId.startsWith('cg4')) {
+    CENTRAL_API = 'https://script.google.com/macros/s/AKfycbx5Ic7kJ-bbkcBzRkr5-ZIGyswSePn5wUvGoJcWMnAGh0hQ4fP2GLCYHgP0nJ42Mmmafg/exec';
+  } else if (loginId.startsWith('cg5')) {
+    CENTRAL_API = 'https://script.google.com/macros/s/AKfycbwZXByvaTOBvB8y8DvQ6r9JRFP_dYQ4PD34rL4LxDpamk73TKJGtAD0fGibC34O-l6PMQ/exec';
+  } else if (loginId.startsWith('cg6')) {
+    CENTRAL_API = 'https://script.google.com/macros/s/AKfycbwSwLzfitvIwTsNDS9TEm5oOFeDGEGF_O2pWaN3zmtvM6f8yQ_Gg-nucX-JCXyoqftXGQ/exec';
+  } else {
+    err.textContent = 'Invalid Login ID.';
+    btn.disabled = false;
+    btn.textContent = 'Login & Start Maths →';
+    return;
+  }
 
   try{
     const data=await apiCall({
