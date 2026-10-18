@@ -846,6 +846,10 @@ async function studentLogin(){
   btn.textContent='Checking...';
 
   // Select the correct Apps Script backend based on Login ID
+  
+  if(loginId.startsWith('cglkg')){
+  CENTRAL_API='https://script.google.com/macros/s/AKfycbwa8ich0p5HL3VNBSRGzh5HmYrPJDtVZdH25tr3nz1y66LOfhtsf872Hq_ruXbWc6Q/exec';
+  }else if(loginId.startsWith('cg1')){
   if(loginId.startsWith('cg1')){
     CENTRAL_API='https://script.google.com/macros/s/AKfycbxD6o5GMyV6T8ZeU1b0-hADy15xvstA9TvKyOI7oxbdA6e0RQXb38VlDxSoxtLdIYEsIA/exec';
   }else if(loginId.startsWith('cg2')){
