@@ -231,6 +231,11 @@ async function loadChapterList(){
   document.getElementById('speedHome').style.display='none';
   document.getElementById('speedPanel').style.display='none';
   document.getElementById('chapterBrowser').style.display='block';
+  const backBtn = document.getElementById('headerBackBtn');
+  if (backBtn) {
+    backBtn.style.display = 'inline-block';
+    backBtn.textContent = '← Back to Home';
+  }
   document.getElementById('learningArea').style.display='none';
 
   document.getElementById('chapterClassLabel').textContent='CLASS '+currentStudent.className;
@@ -1078,7 +1083,7 @@ function showRegularMathsChapters() {
   loadChapterList();
 }
 
-
+  
 function handleHeaderBack() {
   const learningArea = document.getElementById('learningArea');
   const chapterBrowser = document.getElementById('chapterBrowser');
