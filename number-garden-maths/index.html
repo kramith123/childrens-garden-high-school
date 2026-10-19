@@ -1653,7 +1653,11 @@ localStorage.removeItem('ng_speed_exam_active');
 
 
     // Check whether all three levels of this chapter are passed
-    if (result.passed && speedLevel.topicId) {
+    if (
+  result.passed &&
+  speedLevel.topicId &&
+  String(speedLevel.levelId).trim().toUpperCase() === 'L3'
+) {
       try {
          const certCheck = await speedApiCall({
           action: 'getChapterCertificate',
