@@ -1208,6 +1208,7 @@ async function startSpeedLevel(index){
   }
 
   speedLevel = speedSettings[index];
+  localStorage.setItem('ng_speed_level', JSON.stringify(speedLevel));
   const panel = speedPanel();
 
   panel.innerHTML='<h2>Loading questions...</h2><p class="hint">Please wait.</p>';
@@ -1228,20 +1229,89 @@ const data = await speedApiCall({
   )
 });
 
-    speedQuestions=Array.isArray(data.questions)?data.questions:[];
-    if(!speedQuestions.length)throw new Error('No active questions are available for this level.');
-    speedAnswers={};speedSubmitting=false;
-    speedSecondsLeft=Math.max(1,Number(data.timeLimitMinutes||speedLevel.timeLimitMinutes)*60);
-    speedStartedAt=Date.now();
-    renderSpeedTest();
-    clearInterval(speedTimerHandle);
-    speedTimerHandle=setInterval(()=>{
-      speedSecondsLeft--;
-      const timerEl=document.getElementById('speedCountdown');
-      if(timerEl)timerEl.textContent=formatSpeedTime(speedSecondsLeft);
-      if(speedSecondsLeft<=0)finishSpeedTest(true);
-    },1000);
-  }catch(err){
+speedQuestions = Array.isArray(data.questions) ? data.questions : [];
+
+if (!speedQuestions.length) {
+  throw new Error('No active questions are available for this level.');
+}
+
+speedSubmitting = false;
+
+// Check whether an unfinished test can be restored
+const savedLevel = localStorage.getItem('ng_speed_level');
+const savedAnswers = localStorage.getItem('ng_speed_answers');
+const savedTime = localStorage.getItem('ng_speed_time');
+
+let restoreTest = false;
+
+try {
+  const previousLevel = savedLevel ? JSON.parse(savedLevel) : null;
+
+  restoreTest = !!(
+    previousLevel &&
+    String(previousLevel.levelId) === String(speedLevel.levelId) &&
+    String(previousLevel.topicId || '') === String(speedLevel.topicId || '') &&
+    savedTime !== null
+  );
+} catch (e) {
+  restoreTest = false;
+}
+
+if (restoreTest) {
+  try {
+    speedAnswers = JSON.parse(savedAnswers || '{}');
+    speedSecondsLeft = Math.max(0, Number(savedTime));
+  } catch (e) {
+    speedAnswers = {};
+    speedSecondsLeft = Math.max(
+      1,
+      Number(data.timeLimitMinutes || speedLevel.timeLimitMinutes) * 60
+    );
+  }
+} else {
+  speedAnswers = {};
+  speedSecondsLeft = Math.max(
+    1,
+    Number(data.timeLimitMinutes || speedLevel.timeLimitMinutes) * 60
+  );
+
+  localStorage.setItem('ng_speed_level', JSON.stringify(speedLevel));
+  localStorage.setItem('ng_speed_answers', JSON.stringify(speedAnswers));
+  localStorage.setItem('ng_speed_time', String(speedSecondsLeft));
+}
+
+speedStartedAt = Date.now();
+renderSpeedTest();
+
+// Restore the selected answer highlighting
+Object.keys(speedAnswers).forEach(qid => {
+  const answer = speedAnswers[qid];
+  const button = document.querySelector(
+    '.choice[data-q="' + CSS.escape(qid) + '"][data-a="' + answer + '"]'
+  );
+
+  if (button) {
+    button.style.background = '#e9f4ff';
+    button.style.borderColor = '#2878bd';
+  }
+});
+
+clearInterval(speedTimerHandle);
+
+if (speedSecondsLeft <= 0) {
+  finishSpeedTest(true);
+} else {
+  speedTimerHandle = setInterval(() => {
+    speedSecondsLeft--;
+
+    localStorage.setItem('ng_speed_time', String(speedSecondsLeft));
+
+    const timerEl = document.getElementById('speedCountdown');
+    if (timerEl) timerEl.textContent = formatSpeedTime(speedSecondsLeft);
+
+    if (speedSecondsLeft <= 0) finishSpeedTest(true);
+  }, 1000);
+}catch(err){
     panel.innerHTML='<h2>⚡ Speed Maths</h2><p class="hint">'+escapeHtml(err.message)+'</p><div class="actions"><button class="btn secondary" onclick="renderSpeedLevels()">← Levels</button></div>';
   }
 }
@@ -1304,18 +1374,54 @@ const imageHtml = imageUrl
     '<p class="smallnote">The test submits automatically when the timer reaches zero.</p>';
 }
 
-function chooseSpeedAnswer(button){
-  if(speedSubmitting)return;
-  const qid=button.dataset.q, letter=button.dataset.a;
-  speedAnswers[qid]=letter;
-  document.querySelectorAll('.choice[data-q="'+CSS.escape(qid)+'"]').forEach(b=>{b.style.background='white';b.style.borderColor='#dce5ed';});
-  button.style.background='#e9f4ff';button.style.borderColor='#2878bd';
+function chooseSpeedAnswer(button) {
+  if (speedSubmitting) return;
+
+  const qid = button.dataset.q;
+  const letter = button.dataset.a;
+
+  speedAnswers[qid] = letter;
+
+  // Save selected answers for refresh recovery
+  localStorage.setItem(
+    'ng_speed_answers',
+    JSON.stringify(speedAnswers)
+  );
+
+  document
+    .querySelectorAll('.choice[data-q="' + CSS.escape(qid) + '"]')
+    .forEach(b => {
+      b.style.background = 'white';
+      b.style.borderColor = '#dce5ed';
+    });
+
+  button.style.background = '#e9f4ff';
+  button.style.borderColor = '#2878bd';
 }
+
 function cancelSpeedTest(){
-  if(speedSubmitting)return;
+  if(speedSubmitting) return;
+
   clearInterval(speedTimerHandle);
-  speedPanel().innerHTML='<h2>Test exited</h2><p class="hint">This attempt was not submitted.</p><div class="actions"><button class="btn primary" onclick="renderSpeedLevels()">Back to Levels</button><button class="btn secondary" onclick="backToChapters()">Back to Chapters</button></div>';
+
+  localStorage.removeItem('ng_speed_level');
+  localStorage.removeItem('ng_speed_answers');
+  localStorage.removeItem('ng_speed_time');
+  localStorage.removeItem('ng_speed_exam_active');
+
+  speedAnswers = {};
+  speedSecondsLeft = 0;
+  speedLevel = null;
+
+  speedPanel().innerHTML =
+    '<h2>Test exited</h2>' +
+    '<p class="hint">This attempt was not submitted.</p>' +
+    '<div class="actions">' +
+      '<button class="btn primary" onclick="renderSpeedLevels()">Back to Levels</button>' +
+      '<button class="btn secondary" onclick="backToChapters()">Back to Chapters</button>' +
+    '</div>';
 }
+
 async function finishSpeedTest(autoFinished){
   if(speedSubmitting)return;
   speedSubmitting=true;clearInterval(speedTimerHandle);
