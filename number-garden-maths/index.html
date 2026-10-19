@@ -85,6 +85,40 @@ table{border-collapse:collapse;margin:12px auto;background:white}td,th{border:1p
   border-radius: 12px;
 }
 
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  #chapterCertificate,
+  #chapterCertificate * {
+    visibility: visible !important;
+  }
+
+  #chapterCertificate {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .actions,
+  button {
+    display: none !important;
+  }
+
+  @page {
+    size: A4 landscape;
+    margin: 10mm;
+  }
+}
+
 </style></head>
 <body>
 <header><div class="school">CHILDREN’S GARDEN E.M HIGH SCHOOL</div><div class="brand">🌱 NUMBER GARDEN</div><div class="sub">MATHS LEARNING WORLD</div><div class="tag">Learn • Explore • Practise • Achieve</div></header>
@@ -1123,6 +1157,8 @@ if (data.complete !== true) {
           'CHILDREN’S GARDEN E.M. HIGH SCHOOL' +
         '</h2>' +
         '<p>' + escapeHtml(certificateLocation) + '</p>' +
+        '<h2 style="color:#d99b00;margin:10px 0 4px;">🌱 NUMBER GARDEN</h2>' +
+        '<p style="margin:0 0 12px;">MATHS LEARNING WORLD</p>' +
         '<hr style="border:1px solid #b8860b;">' +
         '<h1 style="color:#b8860b;">CERTIFICATE OF ACHIEVEMENT</h1>' +
         '<p>This certificate is proudly presented to</p>' +
