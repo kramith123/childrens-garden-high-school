@@ -1300,6 +1300,12 @@ if (restoreTest) {
   localStorage.setItem('ng_speed_time', String(speedSecondsLeft));
 }
 
+console.log('Saving Speed Maths state:', {
+  level: localStorage.getItem('ng_speed_level'),
+  answers: localStorage.getItem('ng_speed_answers'),
+  time: localStorage.getItem('ng_speed_time')
+});
+
 localStorage.setItem('ng_speed_exam_active', 'true');
 speedStartedAt = Date.now();
 renderSpeedTest();
