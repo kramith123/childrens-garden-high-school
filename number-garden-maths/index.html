@@ -118,6 +118,7 @@ table{border-collapse:collapse;margin:12px auto;background:white}td,th{border:1p
     margin: 10mm;
   }
 }
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 </style></head>
 <body>
@@ -1184,6 +1185,7 @@ if (data.complete !== true) {
 
       '<div class="actions" style="justify-content:center;margin:20px 0;">' +
         '<button class="btn" onclick="window.print()">Print Certificate</button>' +
+        '<button class="btn primary" onclick="saveCertificateImage()">Save as Image</button>' +
         '<button class="btn secondary" onclick="renderSpeedLevels()">Back to Levels</button>' +
       '</div>';
 
@@ -1193,6 +1195,36 @@ if (data.complete !== true) {
   }
 }
 
+
+async function saveCertificateImage() {
+  const certificate = document.getElementById('chapterCertificate');
+
+  if (!certificate) {
+    alert('Certificate not found.');
+    return;
+  }
+
+  if (typeof html2canvas === 'undefined') {
+    alert('Image library load కాలేదు. Internet connection check చేయండి.');
+    return;
+  }
+
+  try {
+    const canvas = await html2canvas(certificate, {
+      scale: 2,
+      backgroundColor: '#fffdf5',
+      useCORS: true
+    });
+
+    const link = document.createElement('a');
+    link.download = 'Number-Garden-Certificate.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  } catch (err) {
+    console.error('Certificate image error:', err);
+    alert('Image save చేయలేకపోయాం. మళ్లీ ప్రయత్నించండి.');
+  }
+}
 
 function speedPanel(){return document.getElementById('speedPanel');}
 
