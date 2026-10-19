@@ -1052,40 +1052,58 @@ function speedApiCall(params){
 }
 function speedPanel(){return document.getElementById('speedPanel');}
 
-
-function openSpeedMaths(){
-  if(!currentStudent||!currentSessionId){
+async function openSpeedMaths() {
+  if (!currentStudent || !currentSessionId) {
     alert('Please log in first.');
     return;
   }
 
-  document.getElementById('chapterBrowser').style.display='none';
-  document.getElementById('speedHome').style.display='none';
-  document.getElementById('learningArea').style.display='none';
-  document.querySelector('.topics').style.display='none';
+  document.getElementById('chapterBrowser').style.display = 'none';
+  document.getElementById('speedHome').style.display = 'none';
+  document.getElementById('learningArea').style.display = 'none';
 
-  const panel=speedPanel();
-  panel.style.display='block';
-  panel.innerHTML='<h2>⚡ Speed Maths</h2><p class="hint">Loading your exams and levels...</p>';
+  const topics = document.querySelector('.topics');
+  if (topics) {
+    topics.style.display = 'none';
+  }
 
-  speedApiCall({
-    action:'getSpeedSettings',
-    className:String(currentStudent.className),
-    studentId:String(currentStudent.loginId || currentStudent.id || currentStudent.studentId || currentStudent.admissionNo || '')
-  })
-  .then(data=>{
-    speedSettings=Array.isArray(data.settings)?data.settings:[];
+  const panel = speedPanel();
+  panel.style.display = 'block';
+  panel.innerHTML =
+    '<h2>⚡ Speed Maths</h2>' +
+    '<p class="hint">Loading your exams and levels...</p>';
+
+  try {
+    const data = await speedApiCall({
+      action: 'getSpeedSettings',
+      className: String(currentStudent.className),
+      studentId: String(
+        currentStudent.loginId ||
+        currentStudent.id ||
+        currentStudent.studentId ||
+        currentStudent.admissionNo ||
+        ''
+      )
+    });
+
+    speedSettings = Array.isArray(data.settings)
+      ? data.settings
+      : [];
+
     renderSpeedLevels();
-  })
-  .catch(err=>{
-    panel.innerHTML=
-      '<h2>⚡ Speed Maths</h2><p class="hint">'+
-      escapeHtml(err.message)+
-      '</p><div class="actions"><button class="btn secondary" onclick="backToChapters()">← Back to Chapters</button></div>';
-  });
+
+  } catch (err) {
+    panel.innerHTML =
+      '<h2>⚡ Speed Maths</h2>' +
+      '<p class="hint">' +
+      escapeHtml(err.message || 'Unable to load Speed Maths levels.') +
+      '</p>' +
+      '<div class="actions">' +
+      '<button class="btn secondary" onclick="backToChapters()">' +
+      '← Back to Chapters</button>' +
+      '</div>';
+  }
 }
-
-
 
 
 function showSpeedHome() {
@@ -1208,7 +1226,7 @@ async function startSpeedLevel(index){
   }
 
   speedLevel = speedSettings[index];
-  localStorage.setItem('ng_speed_level', JSON.stringify(speedLevel));
+  
   const panel = speedPanel();
 
   panel.innerHTML='<h2>Loading questions...</h2><p class="hint">Please wait.</p>';
@@ -1246,8 +1264,10 @@ let restoreTest = false;
 
 try {
   const previousLevel = savedLevel ? JSON.parse(savedLevel) : null;
+  const examActive = localStorage.getItem('ng_speed_exam_active');
 
   restoreTest = !!(
+    examActive === 'true' &&
     previousLevel &&
     String(previousLevel.levelId) === String(speedLevel.levelId) &&
     String(previousLevel.topicId || '') === String(speedLevel.topicId || '') &&
@@ -1280,6 +1300,7 @@ if (restoreTest) {
   localStorage.setItem('ng_speed_time', String(speedSecondsLeft));
 }
 
+localStorage.setItem('ng_speed_exam_active', 'true');
 speedStartedAt = Date.now();
 renderSpeedTest();
 
@@ -1428,18 +1449,33 @@ async function finishSpeedTest(autoFinished){
   const panel=speedPanel();
   panel.innerHTML='<h2>Submitting Speed Maths result...</h2><p class="hint">Please wait. Do not close this page.</p>';
   try{
-    const elapsed=Math.max(0,Math.round((Date.now()-speedStartedAt)/1000));
-    const result=await speedApiCall({
-      action:'submitSpeedResult',
-      studentId:String(currentStudent.loginId || currentStudent.id || currentStudent.studentId || currentStudent.admissionNo || ''),
-      studentName:String(currentStudent.studentName||'Student'),
-      className:String(currentStudent.className),
-      levelId:String(speedLevel.levelId),
-      topicId:String(speedLevel.topicId || ''),
-      answers:JSON.stringify(speedAnswers),
+    const totalAllowedSeconds =
+  Number(speedLevel.timeLimitMinutes || 5) * 60;
 
-      timeTakenSeconds:String(Math.min(elapsed,Number(speedLevel.timeLimitMinutes||5)*60))
-    });
+const elapsed = Math.max(
+  0,
+  totalAllowedSeconds - speedSecondsLeft
+);
+    const result = await speedApiCall({
+  action: 'submitSpeedResult',
+  studentId: String(currentStudent.loginId || currentStudent.id || currentStudent.studentId || currentStudent.admissionNo || ''),
+  studentName: String(currentStudent.studentName || 'Student'),
+  className: String(currentStudent.className),
+  levelId: String(speedLevel.levelId),
+  topicId: String(speedLevel.topicId || ''),
+  answers: JSON.stringify(speedAnswers),
+  timeTakenSeconds: String(
+    Math.min(
+      elapsed,
+      Number(speedLevel.timeLimitMinutes || 5) * 60
+    )
+  )
+});
+
+localStorage.removeItem('ng_speed_level');
+localStorage.removeItem('ng_speed_answers');
+localStorage.removeItem('ng_speed_time');
+localStorage.removeItem('ng_speed_exam_active');
     panel.innerHTML='<h2>🏆 Speed Maths Completed!</h2><div class="lesson"><div class="sum">'+Number(result.score)+' / '+Number(result.totalMarks)+'</div><p><b>Correct:</b> '+result.correct+' · <b>Wrong:</b> '+result.wrong+' · <b>Unanswered:</b> '+result.unanswered+'</p><p><b>Accuracy:</b> '+result.accuracyPercent+'%</p><p><b>Time Taken:</b> '+formatSpeedTime(result.timeTakenSeconds)+'</p><p><b>Status:</b> '+(result.passed?'Passed':'Keep Practising')+'</p><p class="hint">Result saved to Speed_Results and Speed_Tracking.</p>'+(autoFinished?'<p class="hint">The time limit ended, so the test was submitted automatically.</p>':'')+'</div><div class="actions"><button class="btn primary" onclick="refreshSpeedLevels()">Try Another Level</button><button class="btn secondary" onclick="backToChapters()">Back to Chapters</button></div>';
   }catch(err){
     speedSubmitting=false;
@@ -1525,7 +1561,34 @@ if (loginInput) {
     document.getElementById('loginGate').style.display = 'none';
     document.getElementById('mathsApp').style.display = 'block';
 
+      
+const examActive = localStorage.getItem('ng_speed_exam_active');
+const savedLevelText = localStorage.getItem('ng_speed_level');
+
+if (examActive === 'true' && savedLevelText) {
+  try {
+    const savedLevel = JSON.parse(savedLevelText);
+
+    await openSpeedMaths();
+
+    const levelIndex = speedSettings.findIndex(level =>
+      String(level.levelId) === String(savedLevel.levelId) &&
+      String(level.topicId || '') === String(savedLevel.topicId || '')
+    );
+
+    if (levelIndex >= 0) {
+      await startSpeedLevel(levelIndex);
+    } else {
+      showSpeedHome();
+    }
+  } catch (e) {
+    console.warn('Could not restore Speed Maths test:', e);
     showSpeedHome();
+  }
+} else {
+  showSpeedHome();
+}
+
 
   } catch (err) {
     console.warn('Could not restore student login:', err.message);
