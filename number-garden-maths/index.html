@@ -1655,7 +1655,7 @@ localStorage.removeItem('ng_speed_exam_active');
     // Check whether all three levels of this chapter are passed
     if (result.passed && speedLevel.topicId) {
       try {
-        const certCheck = await speedApiCall({
+         const certCheck = await speedApiCall({
           action: 'getChapterCertificate',
           studentId: String(
             currentStudent.loginId ||
@@ -1670,13 +1670,17 @@ localStorage.removeItem('ng_speed_exam_active');
             'Student'
           ),
           className: String(currentStudent.className || ''),
-          topicId: String(speedLevel.topicId)
+          topicId: String(speedLevel.topicId || '')
         });
 
-        if (certCheck.success && certCheck.complete) {
+        console.log('Certificate API response:', certCheck);
+
+        if (certCheck.success === true &&
+            certCheck.complete === true) {
           await loadChapterCertificate(speedLevel.topicId);
           return;
         }
+
       } catch (certErr) {
         console.error('Certificate check failed:', certErr);
       }
