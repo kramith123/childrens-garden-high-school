@@ -1050,6 +1050,94 @@ function speedApiCall(params){
     document.body.appendChild(script);
   });
 }
+
+async function loadChapterCertificate(topicId) {
+  try {
+    const data = await speedApiCall({
+      action: 'getChapterCertificate',
+      studentId: String(
+        currentStudent.loginId ||
+        currentStudent.id ||
+        currentStudent.studentId ||
+        currentStudent.admissionNo ||
+        ''
+      ),
+      studentName: String(
+        currentStudent.studentName ||
+        currentStudent.name ||
+        'Student'
+      ),
+      className: String(currentStudent.className || ''),
+      topicId: String(topicId || '')
+    });
+
+    console.log('Chapter Certificate details:', data);
+
+    if (!data.success) {
+      alert(data.message || 'Certificate details not available.');
+      return;
+    }
+
+    if (!data.complete) {
+      alert('ఈ Chapter Certificate పొందడానికి మూడు Levels‌లోనూ Pass కావాలి.');
+      return;
+    }
+
+    const levelRows = data.levels.map(level =>
+      '<tr>' +
+        '<td>' + escapeHtml(level.levelName) + '</td>' +
+        '<td>' + Number(level.score || 0) + '</td>' +
+        '<td>' + (level.passed ? 'PASS' : 'NOT PASSED') + '</td>' +
+      '</tr>'
+    ).join('');
+
+    const panel = speedPanel();
+
+    panel.innerHTML =
+      '<div id="chapterCertificate" style="' +
+        'background:#fffdf5;color:#222;border:8px double #b8860b;' +
+        'padding:30px;text-align:center;max-width:850px;margin:20px auto;' +
+        'font-family:Georgia,serif;">' +
+
+        '<h2 style="color:#14532d;margin-bottom:5px;">' +
+          'CHILDREN’S GARDEN E.M. HIGH SCHOOL' +
+        '</h2>' +
+        '<p>Brahmana Gudem, E.G. District</p>' +
+        '<hr style="border:1px solid #b8860b;">' +
+        '<h1 style="color:#b8860b;">CERTIFICATE OF ACHIEVEMENT</h1>' +
+        '<p>This certificate is proudly presented to</p>' +
+        '<h2>' + escapeHtml(data.studentName || 'Student') + '</h2>' +
+        '<p>Class: <b>' + escapeHtml(data.className) + '</b></p>' +
+        '<p>for successfully completing the chapter</p>' +
+        '<h2>' + escapeHtml(data.chapterName) + '</h2>' +
+
+        '<table style="width:100%;border-collapse:collapse;margin-top:20px;">' +
+          '<thead><tr>' +
+            '<th style="border:1px solid #777;padding:10px;">Level</th>' +
+            '<th style="border:1px solid #777;padding:10px;">Score</th>' +
+            '<th style="border:1px solid #777;padding:10px;">Result</th>' +
+          '</tr></thead>' +
+          '<tbody>' + levelRows + '</tbody>' +
+        '</table>' +
+
+        '<p style="margin-top:25px;">Date: <b>' +
+          new Date().toLocaleDateString('en-IN') +
+        '</b></p>' +
+        '<p style="margin-top:35px;">School Management</p>' +
+      '</div>' +
+
+      '<div class="actions" style="justify-content:center;margin:20px 0;">' +
+        '<button class="btn" onclick="window.print()">Print Certificate</button>' +
+        '<button class="btn secondary" onclick="renderSpeedLevels()">Back to Levels</button>' +
+      '</div>';
+
+  } catch (err) {
+    console.error('Certificate error:', err);
+    alert('Certificate వివరాలు పొందలేకపోయాం: ' + err.message);
+  }
+}
+
+
 function speedPanel(){return document.getElementById('speedPanel');}
 
 async function openSpeedMaths() {
@@ -1153,47 +1241,68 @@ function handleHeaderBack() {
 }
 
 
-function renderSpeedLevels(){
-  const panel = speedPanel();
-  const levels = speedSettings;
 
-  panel.innerHTML =
-    '<div class="chapter-head">' +
-      '<div><h2>⚡ Speed Maths Levels</h2>' +
-      '<p class="hint">Class ' +
-      escapeHtml(currentStudent.className) +
-      ' · Complete each level to unlock the next.</p></div>' +
-      '<button class="btn secondary" onclick="backToChapters()">← Chapters</button>' +
-    '</div>' +
+function getChapterCertificate_(p) {
+  const studentId = String(p.studentId || "").trim();
+  const className = String(p.className || "").trim();
+  const topicId = String(p.topicId || "").trim();
 
-    (levels.length
-      ? '<div class="chapter-grid">' +
-        levels.map((l, i) => {
-          const unlocked = l.unlocked === true;
+  if (!studentId || !className || !topicId) {
+    throw new Error("Student, class and chapter details are required");
+  }
 
-          return '<button class="chapter-card ' +
-            (unlocked ? 'unlocked' : 'locked') +
-            '" type="button" ' +
-            (unlocked ? 'onclick="startSpeedLevel(' + i + ')"' : 'disabled') +
-            '>' +
-              '<span class="chapter-no">' +
-                escapeHtml(l.levelId) +
-              '</span>' +
-              '<span class="chapter-info"><b>' +
-                escapeHtml(l.levelName) +
-              '</b><small>' +
-                escapeHtml(l.topic) + ' · ' +
-                Number(l.timeLimitMinutes) + ' min · ' +
-                Number(l.totalQuestions) + ' questions' +
-              '</small></span>' +
-              '<span class="chapter-status">' +
-                (unlocked ? '🔓 OPEN' : '🔒 LOCKED') +
-              '</span>' +
-          '</button>';
-        }).join('') +
-        '</div>'
-      : '<div class="lesson"><p>No Speed Maths levels are available for this class.</p></div>');
+  const settings = getRows_("Speed_Settings").filter(r =>
+    String(r.Class || "").trim().toLowerCase() === className.toLowerCase() &&
+    String(r.Topic_ID || "").trim() === topicId &&
+    isLevelUnlocked_(r.Status)
+  );
+
+  if (!settings.length) {
+    throw new Error("No levels found for this chapter");
+  }
+
+  const results = getRows_("Speed_Results").filter(r =>
+    String(r.Student_ID || "").trim() === studentId &&
+    String(r.Class || "").trim().toLowerCase() === className.toLowerCase() &&
+    String(r.Topic_ID || "").trim() === topicId &&
+    String(r.Status || "").trim().toLowerCase() === "passed"
+  );
+
+  const levels = settings.map(level => {
+    const attempts = results.filter(r =>
+      String(r.Level_ID || "").trim() ===
+      String(level.Level_ID || "").trim()
+    );
+
+    const best = attempts.reduce((a, b) =>
+      !a || Number(b.Score || 0) > Number(a.Score || 0) ? b : a,
+      null
+    );
+
+    return {
+      levelId: String(level.Level_ID || ""),
+      levelName: String(level.Level_Name || ""),
+      score: best ? Number(best.Score || 0) : 0,
+      passed: Boolean(best)
+    };
+  });
+
+  const complete =
+    levels.length >= 3 &&
+    levels.every(level => level.passed);
+
+  return {
+    success: true,
+    complete: complete,
+    studentId: studentId,
+    studentName: String(p.studentName || ""),
+    className: className,
+    topicId: topicId,
+    chapterName: String(settings[0].Topic || topicId),
+    levels: levels
+  };
 }
+
 
 async function refreshSpeedLevels() {
   try {
