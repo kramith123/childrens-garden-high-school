@@ -1092,6 +1092,25 @@ if (data.complete !== true) {
       '</tr>'
     ).join('');
 
+    const certificateLoginId = String(
+      data.studentId ||
+      currentStudent.loginId ||
+      currentStudent.id ||
+      currentStudent.studentId ||
+      currentStudent.admissionNo ||
+      ''
+    ).trim().toLowerCase();
+
+    let certificateLocation = '';
+
+    if (certificateLoginId.endsWith('brg')) {
+      certificateLocation = 'BRAHMANAGUDEM';
+    } else if (certificateLoginId.endsWith('gdv')) {
+      certificateLocation = 'GUDIVADA, KRISHNA DISTRICT';
+    } else {
+      certificateLocation = 'BRAHMANAGUDEM, E.G. DISTRICT';
+    }
+
     const panel = speedPanel();
 
     panel.innerHTML =
@@ -1103,7 +1122,7 @@ if (data.complete !== true) {
         '<h2 style="color:#14532d;margin-bottom:5px;">' +
           'CHILDREN’S GARDEN E.M. HIGH SCHOOL' +
         '</h2>' +
-        '<p>Brahmana Gudem, E.G. District</p>' +
+        '<p>' + escapeHtml(certificateLocation) + '</p>' +
         '<hr style="border:1px solid #b8860b;">' +
         '<h1 style="color:#b8860b;">CERTIFICATE OF ACHIEVEMENT</h1>' +
         '<p>This certificate is proudly presented to</p>' +
