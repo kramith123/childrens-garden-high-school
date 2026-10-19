@@ -818,16 +818,19 @@ function backToChapters(){
 }
 
 function studentLogout(){
-  currentStudent=null;
-  currentSessionId='';
-  currentActivityId='';
-  currentActivityName='';
+  currentStudent = null;
+  currentSessionId = '';
+  currentActivityId = '';
+  currentActivityName = '';
 
-  document.getElementById('mathsApp').style.display='none';
-  document.getElementById('loginGate').style.display='block';
+  localStorage.removeItem('ng_current_student');
+  localStorage.removeItem('ng_current_session');
 
-  document.getElementById('loginIdInput').value='';
-  document.getElementById('loginError').textContent='';
+  document.getElementById('mathsApp').style.display = 'none';
+  document.getElementById('loginGate').style.display = 'block';
+
+  document.getElementById('loginIdInput').value = '';
+  document.getElementById('loginError').textContent = '';
 }
 async function studentLogin(){
   const input=document.getElementById('loginIdInput'),
@@ -880,6 +883,8 @@ async function studentLogin(){
 
     currentStudent=data;
     currentSessionId=data.sessionId;
+    localStorage.setItem('ng_current_student', JSON.stringify(data));
+    localStorage.setItem('ng_current_session', data.sessionId || '');
 
     saved.clear();
     JSON.parse(localStorage.getItem(progressKey())||'[]')
@@ -1172,7 +1177,30 @@ function renderSpeedLevels(){
       : '<div class="lesson"><p>No Speed Maths levels are available for this class.</p></div>');
 }
 
+async function refreshSpeedLevels() {
+  try {
+    const data = await speedApiCall({
+      action: 'getSpeedSettings',
+      className: String(currentStudent.className),
+      studentId: String(
+        currentStudent.loginId ||
+        currentStudent.id ||
+        currentStudent.studentId ||
+        currentStudent.admissionNo ||
+        ''
+      )
+    });
 
+    speedSettings = Array.isArray(data.settings)
+      ? data.settings
+      : [];
+
+    renderSpeedLevels();
+  } catch (err) {
+    alert('Levels load కాలేదు. దయచేసి మళ్లీ ప్రయత్నించండి.');
+  }
+}
+  
 async function startSpeedLevel(index){
   if (!speedSettings[index] || speedSettings[index].unlocked !== true) {
     alert("Please complete the previous level to unlock this level.");
@@ -1306,7 +1334,7 @@ async function finishSpeedTest(autoFinished){
 
       timeTakenSeconds:String(Math.min(elapsed,Number(speedLevel.timeLimitMinutes||5)*60))
     });
-    panel.innerHTML='<h2>🏆 Speed Maths Completed!</h2><div class="lesson"><div class="sum">'+Number(result.score)+' / '+Number(result.totalMarks)+'</div><p><b>Correct:</b> '+result.correct+' · <b>Wrong:</b> '+result.wrong+' · <b>Unanswered:</b> '+result.unanswered+'</p><p><b>Accuracy:</b> '+result.accuracyPercent+'%</p><p><b>Time Taken:</b> '+formatSpeedTime(result.timeTakenSeconds)+'</p><p><b>Status:</b> '+(result.passed?'Passed':'Keep Practising')+'</p><p class="hint">Result saved to Speed_Results and Speed_Tracking.</p>'+(autoFinished?'<p class="hint">The time limit ended, so the test was submitted automatically.</p>':'')+'</div><div class="actions"><button class="btn primary" onclick="renderSpeedLevels()">Try Another Level</button><button class="btn secondary" onclick="backToChapters()">Back to Chapters</button></div>';
+    panel.innerHTML='<h2>🏆 Speed Maths Completed!</h2><div class="lesson"><div class="sum">'+Number(result.score)+' / '+Number(result.totalMarks)+'</div><p><b>Correct:</b> '+result.correct+' · <b>Wrong:</b> '+result.wrong+' · <b>Unanswered:</b> '+result.unanswered+'</p><p><b>Accuracy:</b> '+result.accuracyPercent+'%</p><p><b>Time Taken:</b> '+formatSpeedTime(result.timeTakenSeconds)+'</p><p><b>Status:</b> '+(result.passed?'Passed':'Keep Practising')+'</p><p class="hint">Result saved to Speed_Results and Speed_Tracking.</p>'+(autoFinished?'<p class="hint">The time limit ended, so the test was submitted automatically.</p>':'')+'</div><div class="actions"><button class="btn primary" onclick="refreshSpeedLevels()">Try Another Level</button><button class="btn secondary" onclick="backToChapters()">Back to Chapters</button></div>';
   }catch(err){
     speedSubmitting=false;
     panel.innerHTML='<h2>Result could not be saved</h2><p class="hint">'+escapeHtml(err.message)+'</p><div class="actions"><button class="btn primary" onclick="finishSpeedTest('+Boolean(autoFinished)+')">Retry Submit</button><button class="btn secondary" onclick="renderSpeedLevels()">Back to Levels</button></div>';
@@ -1330,6 +1358,73 @@ if (loginInput) {
     }
   });
 }
+
+// Restore student login after page refresh
+(async function restoreStudentLogin() {
+  const savedStudent = localStorage.getItem('ng_current_student');
+  const savedSession = localStorage.getItem('ng_current_session');
+
+  if (!savedStudent || !savedSession) return;
+
+  try {
+    const data = JSON.parse(savedStudent);
+
+    if (!data || !data.loginId) return;
+
+    // Select the correct backend for the saved student
+    const loginId = String(data.loginId);
+
+    if (loginId.startsWith('cglkg')) {
+      CENTRAL_API = 'https://script.google.com/macros/s/AKfycbwa8ich0p5HL3VNBSRGzh5HmYrPJDtVZdH25tr3nz1y66LOfhtsf872Hq_ruXbWc6Q/exec';
+    } else if (loginId.startsWith('cgukg')) {
+      CENTRAL_API = 'https://script.google.com/macros/s/AKfycbyoHgKZx-KxE6pE_d2isBVUZs1TgpCfmmMWCKsm-SFQ2sf_KqqChRbrwDgKFyvu2sHA/exec';
+    } else if (loginId.startsWith('cg1')) {
+      CENTRAL_API = 'https://script.google.com/macros/s/AKfycbxD6o5GMyV6T8ZeU1b0-hADy15xvstA9TvKyOI7oxbdA6e0RQXb38VlDxSoxtLdIYEsIA/exec';
+    } else if (loginId.startsWith('cg2')) {
+      CENTRAL_API = 'https://script.google.com/macros/s/AKfycbw2A0xA13vQxf8GBt_WoHanxHtp-cRGUDOf0H1h1lS346mePtinHjlBEy6pKUibZ4xbWQ/exec';
+    } else if (loginId.startsWith('cg3')) {
+      CENTRAL_API = 'https://script.google.com/macros/s/AKfycbytmK2HTzxQNvE62xrpLK965-_2Xn_5EKAq7ymW46YznvcNZ0Bzqe2m0FeUwlen63rw/exec';
+    } else if (loginId.startsWith('cg4')) {
+      CENTRAL_API = 'https://script.google.com/macros/s/AKfycbx5Ic7kJ-bbkcBzRkr5-ZIGyswSePn5wUvGoJcWMnAGh0hQ4fP2GLCYHgP0nJ42Mmmafg/exec';
+    } else if (loginId.startsWith('cg5')) {
+      CENTRAL_API = 'https://script.google.com/macros/s/AKfycbwZXByvaTOBvB8y8DvQ6r9JRFP_dYQ4PD34rL4LxDpamk73TKJGtAD0fGibC34O-l6PMQ/exec';
+    } else if (loginId.startsWith('cg6')) {
+      CENTRAL_API = 'https://script.google.com/macros/s/AKfycbwSwLzfitvIwTsNDS9TEm5oOFeDGEGF_O2pWaN3zmtvM6f8yQ_Gg-nucX-JCXyoqftXGQ/exec';
+    } else {
+      return;
+    }
+
+    const result = await apiCall({
+      action: 'login',
+      loginId: loginId,
+      appId: 'NG',
+      source: 'Number Garden Maths'
+    });
+
+    currentStudent = result;
+    currentSessionId = result.sessionId || savedSession;
+
+    saved.clear();
+    JSON.parse(localStorage.getItem(progressKey()) || '[]')
+      .forEach(x => saved.add(x));
+
+    updateProgress();
+
+    document.getElementById('studentWelcome').textContent =
+      'Welcome, ' + result.studentName + '!';
+
+    document.getElementById('studentClassPill').textContent =
+      'CLASS ' + result.className + ' · MATHS';
+
+    document.getElementById('loginGate').style.display = 'none';
+    document.getElementById('mathsApp').style.display = 'block';
+
+    showSpeedHome();
+
+  } catch (err) {
+    console.warn('Could not restore student login:', err.message);
+  }
+})();
 
 // Keep the old built-in Chapter 1 test disabled; only active Sheet questions are used.
 updateProgress();
