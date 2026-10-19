@@ -1073,15 +1073,16 @@ async function loadChapterCertificate(topicId) {
 
     console.log('Chapter Certificate details:', data);
 
-    if (!data.success) {
-      alert(data.message || 'Certificate details not available.');
-      return;
-    }
+    
+if (data.success !== true) {
+  alert(data.message || 'Certificate details not available.');
+  return;
+}
 
-    if (data.success !== true || data.complete !== true) {
-      alert('ఈ Chapter Certificate పొందడానికి మూడు Levels‌లోనూ Pass కావాలి.');
-      return;
-    }
+if (data.complete !== true) {
+  alert('ఈ Chapter Certificate పొందడానికి మూడు Levels‌లోనూ Pass కావాలి.');
+  return;
+}
 
     const levelRows = data.levels.map(level =>
       '<tr>' +
