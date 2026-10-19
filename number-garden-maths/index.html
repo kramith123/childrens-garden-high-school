@@ -1605,6 +1605,38 @@ localStorage.removeItem('ng_speed_answers');
 localStorage.removeItem('ng_speed_time');
 localStorage.removeItem('ng_speed_exam_active');
     panel.innerHTML='<h2>🏆 Speed Maths Completed!</h2><div class="lesson"><div class="sum">'+Number(result.score)+' / '+Number(result.totalMarks)+'</div><p><b>Correct:</b> '+result.correct+' · <b>Wrong:</b> '+result.wrong+' · <b>Unanswered:</b> '+result.unanswered+'</p><p><b>Accuracy:</b> '+result.accuracyPercent+'%</p><p><b>Time Taken:</b> '+formatSpeedTime(result.timeTakenSeconds)+'</p><p><b>Status:</b> '+(result.passed?'Passed':'Keep Practising')+'</p><p class="hint">Result saved to Speed_Results and Speed_Tracking.</p>'+(autoFinished?'<p class="hint">The time limit ended, so the test was submitted automatically.</p>':'')+'</div><div class="actions"><button class="btn primary" onclick="refreshSpeedLevels()">Try Another Level</button><button class="btn secondary" onclick="backToChapters()">Back to Chapters</button></div>';
+
+
+    // Check whether all three levels of this chapter are passed
+    if (result.passed && speedLevel.topicId) {
+      try {
+        const certCheck = await speedApiCall({
+          action: 'getChapterCertificate',
+          studentId: String(
+            currentStudent.loginId ||
+            currentStudent.id ||
+            currentStudent.studentId ||
+            currentStudent.admissionNo ||
+            ''
+          ),
+          studentName: String(
+            currentStudent.studentName ||
+            currentStudent.name ||
+            'Student'
+          ),
+          className: String(currentStudent.className || ''),
+          topicId: String(speedLevel.topicId)
+        });
+
+        if (certCheck.success && certCheck.complete) {
+          await loadChapterCertificate(speedLevel.topicId);
+          return;
+        }
+      } catch (certErr) {
+        console.error('Certificate check failed:', certErr);
+      }
+    }
+ 
   }catch(err){
     speedSubmitting=false;
     panel.innerHTML='<h2>Result could not be saved</h2><p class="hint">'+escapeHtml(err.message)+'</p><div class="actions"><button class="btn primary" onclick="finishSpeedTest('+Boolean(autoFinished)+')">Retry Submit</button><button class="btn secondary" onclick="renderSpeedLevels()">Back to Levels</button></div>';
