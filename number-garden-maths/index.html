@@ -1679,11 +1679,15 @@ localStorage.removeItem('ng_speed_exam_active');
 
         console.log('Certificate API response:', certCheck);
 
-        if (certCheck.success === true &&
-            certCheck.complete === true) {
+        if (
+          result.passed &&
+          String(speedLevel.levelId).trim().toUpperCase() === 'L3' &&
+          certCheck.success === true &&
+          certCheck.complete === true
+        ) {
           await loadChapterCertificate(speedLevel.topicId);
           return;
-        }
+       }
 
       } catch (certErr) {
         console.error('Certificate check failed:', certErr);
