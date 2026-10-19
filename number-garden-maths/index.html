@@ -1330,13 +1330,26 @@ if (speedSecondsLeft <= 0) {
     const timerEl = document.getElementById('speedCountdown');
     if (timerEl) timerEl.textContent = formatSpeedTime(speedSecondsLeft);
 
+ 
     if (speedSecondsLeft <= 0) finishSpeedTest(true);
   }, 1000);
-}catch(err){
-    panel.innerHTML='<h2>⚡ Speed Maths</h2><p class="hint">'+escapeHtml(err.message)+'</p><div class="actions"><button class="btn secondary" onclick="renderSpeedLevels()">← Levels</button></div>';
+  }
+} catch (err) {
+  panel.innerHTML =
+    '<h2>⚡ Speed Maths</h2>' +
+    '<p class="hint">' + escapeHtml(err.message) + '</p>' +
+    '<div class="actions">' +
+    '<button class="btn secondary" onclick="renderSpeedLevels()">← Levels</button>' +
+    '</div>';
   }
 }
-function formatSpeedTime(seconds){seconds=Math.max(0,Number(seconds)||0);return Math.floor(seconds/60)+':'+String(seconds%60).padStart(2,'0');}
+
+function formatSpeedTime(seconds) {
+  seconds = Math.max(0, Number(seconds) || 0);
+  return Math.floor(seconds / 60) + ':' +
+    String(seconds % 60).padStart(2, '0');
+}
+
 
 function renderSpeedTest(){
   const panel = speedPanel();
