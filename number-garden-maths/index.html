@@ -1185,10 +1185,12 @@ async function startSpeedLevel(index){
   panel.innerHTML='<h2>Loading questions...</h2><p class="hint">Please wait.</p>';
   try{
     
+
 const data = await speedApiCall({
   action: 'getSpeedQuestions',
   className: String(currentStudent.className),
   levelId: String(speedLevel.levelId),
+  topicId: String(speedLevel.topicId || ''),
   studentId: String(
     currentStudent.loginId ||
     currentStudent.id ||
