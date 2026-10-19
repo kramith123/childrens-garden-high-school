@@ -1574,6 +1574,11 @@ if (loginInput) {
     document.getElementById('loginGate').style.display = 'none';
     document.getElementById('mathsApp').style.display = 'block';
 
+    console.log('Restore check:', {
+  examActive: localStorage.getItem('ng_speed_exam_active'),
+  savedLevel: localStorage.getItem('ng_speed_level'),
+  savedTime: localStorage.getItem('ng_speed_time')
+});
       
 const examActive = localStorage.getItem('ng_speed_exam_active');
 const savedLevelText = localStorage.getItem('ng_speed_level');
