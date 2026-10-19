@@ -1078,7 +1078,7 @@ async function loadChapterCertificate(topicId) {
       return;
     }
 
-    if (!data.complete) {
+    if (data.success !== true || data.complete !== true) {
       alert('ఈ Chapter Certificate పొందడానికి మూడు Levels‌లోనూ Pass కావాలి.');
       return;
     }
