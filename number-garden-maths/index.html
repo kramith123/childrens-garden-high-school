@@ -1119,6 +1119,20 @@ if (data.complete !== true) {
   return;
 }
 
+const pdfResult = await speedApiCall({
+  action: 'saveCertificatePdf',
+  studentId: String(data.studentId || ''),
+  studentName: String(data.studentName || 'Student'),
+  className: String(data.className || ''),
+  topicId: String(data.topicId || topicId || '')
+});
+
+if (pdfResult.success && pdfResult.url) {
+  console.log('Certificate PDF saved:', pdfResult.url);
+  alert('Certificate PDF Google Drive‌లో సేవ్ అయింది.');
+} else {
+  alert('Certificate PDF సేవ్ చేయలేకపోయాం.');
+}
     const levelRows = data.levels.map(level =>
       '<tr>' +
         '<td>' + escapeHtml(level.levelName) + '</td>' +
