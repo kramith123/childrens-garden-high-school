@@ -118,139 +118,187 @@ table{border-collapse:collapse;margin:12px auto;background:white}td,th{border:1p
     margin: 10mm;
   }
 }
-</style>
 
 
-/* Colourful Number Garden Home Page */
-.home-options {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 22px;
-  margin: 22px 0;
+/* NUMBER GARDEN - TWO BLOCK HOME PAGE */
+
+#speedHome {
+  max-width: 1100px;
+  margin: 22px auto;
+  padding: 26px;
+  background: #ffffff !important;
+  border: 2px solid #dbe5f0 !important;
+  border-radius: 24px;
+  box-shadow: 0 12px 32px rgba(25, 55, 90, 0.10);
 }
 
-.home-card {
-  position: relative;
-  overflow: hidden;
+#speedHome > div:first-child {
+  background: linear-gradient(120deg, #173d69, #26747a);
+  border-radius: 18px;
+  padding: 25px 12px !important;
+  margin-bottom: 24px;
+}
+
+#speedHome > div:first-child > div {
+  color: #ffdc68 !important;
+  font-size: clamp(28px, 4vw, 38px) !important;
+}
+
+#speedHome > div:first-child h2 {
+  color: #ffffff !important;
+  font-size: 21px;
+}
+
+#speedHome > div:first-child p {
+  color: #eaf4ff !important;
+}
+
+#speedHome .home-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  align-items: stretch;
+  margin: 0;
+}
+
+#speedHome .home-card {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
-  border-radius: 24px;
-  padding: 24px;
-  box-shadow: 0 10px 26px rgba(29, 59, 96, 0.12);
+  padding: 22px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 8px 22px rgba(20, 45, 80, .12);
   transition: transform .2s, box-shadow .2s;
 }
 
-.home-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 15px 30px rgba(29, 59, 96, 0.18);
+#speedHome .home-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 13px 28px rgba(20, 45, 80, .17);
 }
 
-.speed-card {
-  background: linear-gradient(145deg, #e0fff0, #b8f0db 55%, #e6fff7);
-  border: 2px solid #83d8b4;
+#speedHome .speed-card {
+  background: linear-gradient(145deg, #effcf5, #d4f5e4) !important;
+  border: 2px solid #29a875;
 }
 
-.regular-card {
-  background: linear-gradient(145deg, #e7f0ff, #d9dcff 55%, #f4e9ff);
-  border: 2px solid #a8b9f4;
+#speedHome .regular-card {
+  background: linear-gradient(145deg, #f1f4ff, #e0e7ff) !important;
+  border: 2px solid #5578df;
 }
 
-.home-art {
+#speedHome .home-art {
   display: flex;
-  justify-content: center;
   align-items: center;
-  min-height: 185px;
-  border-radius: 20px;
+  justify-content: center;
+  height: 155px;
+  min-height: 155px;
+  border-radius: 15px;
   margin-bottom: 20px;
-  overflow: hidden;
 }
 
-.speed-art {
-  background: linear-gradient(135deg, #168c72, #6cddac);
+#speedHome .speed-art {
+  background: linear-gradient(135deg, #087f5b, #25b981) !important;
 }
 
-.regular-art {
-  background: linear-gradient(135deg, #456fd1, #9d86ed);
+#speedHome .regular-art {
+  background: linear-gradient(135deg, #3157b7, #8064dc) !important;
 }
 
-.home-art svg {
-  display: block;
-  width: min(100%, 280px);
-  height: 175px;
+#speedHome .home-art svg {
+  width: min(100%, 245px);
+  height: 145px;
 }
 
-.home-card h2 {
-  font-size: clamp(23px, 2.5vw, 30px);
-  margin: 0 0 8px;
+#speedHome .home-card h2 {
+  font-size: clamp(23px, 2.4vw, 29px);
+  margin: 0 0 10px;
 }
 
-.speed-card h2 { color: #087653; }
-.regular-card h2 { color: #304ca7; }
+#speedHome .speed-card h2 {
+  color: #08734f;
+}
 
-.home-card p {
-  line-height: 1.6;
-  margin: 8px 0 18px;
+#speedHome .regular-card h2 {
+  color: #3152ad;
+}
+
+#speedHome .home-card p {
   color: #34465d;
+  font-size: 15px;
+  line-height: 1.7;
+  margin: 5px 0 15px;
 }
 
-.home-features {
+#speedHome .home-features {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 14px 0 20px;
+  margin: 8px 0 22px;
 }
 
-.home-feature {
-  background: rgba(255,255,255,.8);
-  border-radius: 30px;
+#speedHome .home-feature {
+  display: inline-block;
+  background: #ffffff;
+  border: 1px solid #d8e2ec;
+  border-radius: 24px;
   padding: 8px 11px;
+  color: #34465d;
   font-size: 13px;
   font-weight: 700;
-  color: #30445c;
 }
 
-.home-action {
+#speedHome .home-action {
   width: 100%;
-  min-height: 48px;
-  border: 0;
-  border-radius: 13px;
-  color: white;
-  font-size: 16px;
+  min-height: 50px;
+  margin-top: auto;
+  border: none;
+  border-radius: 12px;
+  padding: 13px 15px;
+  color: #ffffff !important;
+  font-size: 15px;
   font-weight: 800;
   cursor: pointer;
-  padding: 13px;
 }
 
-.speed-action {
-  background: linear-gradient(90deg, #13845e, #20a876);
+#speedHome .speed-action {
+  background: #087f5b !important;
 }
 
-.regular-action {
-  background: linear-gradient(90deg, #315fc2, #7654ce);
+#speedHome .regular-action {
+  background: #3157b7 !important;
 }
 
-.home-action:hover {
-  filter: brightness(1.06);
+#speedHome .home-action:hover {
+  filter: brightness(1.10);
 }
 
 @media (max-width: 650px) {
-  .home-options {
+  #speedHome {
+    padding: 14px;
+    margin: 14px auto;
+  }
+
+  #speedHome .home-options {
     grid-template-columns: 1fr;
     gap: 16px;
   }
 
-  .home-card {
-    padding: 18px;
+  #speedHome .home-card {
+    padding: 16px;
   }
 
-  .home-art {
-    min-height: 155px;
+  #speedHome .home-art {
+    height: 135px;
+    min-height: 135px;
   }
 
-  .home-art svg {
-    height: 150px;
+  #speedHome .home-art svg {
+    height: 125px;
   }
 }
 
+</style>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body>
