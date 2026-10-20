@@ -555,6 +555,48 @@ header .tag {
   }
 }
 
+
+/* Compact home layout after login */
+#mathsApp {
+  padding-top: 0 !important;
+}
+
+#mathsApp .welcome {
+  margin-top: 8px !important;
+  margin-bottom: 8px !important;
+}
+
+#speedHome {
+  margin-top: 8px !important;
+  padding: 12px !important;
+}
+
+#speedHome .home-options {
+  margin-top: 0 !important;
+  gap: 16px !important;
+}
+
+#speedHome .home-card {
+  min-height: 0 !important;
+}
+
+@media (max-width: 650px) {
+  #mathsApp .welcome {
+    margin-top: 6px !important;
+    margin-bottom: 6px !important;
+    padding: 10px !important;
+  }
+
+  #speedHome {
+    margin-top: 6px !important;
+    padding: 8px !important;
+  }
+
+  #speedHome .home-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+}
   
 </style>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -583,17 +625,7 @@ header .tag {
 
 <section id="speedHome" class="panel" style="display:none;min-height:0;background:linear-gradient(135deg,#f4f8ff,#eefcf6);border:2px solid #d3e4f4;border-radius:24px;padding:22px">
 
-  <div style="text-align:center;padding:12px 8px 22px">
-    <div style="font-size:clamp(24px,4vw,34px);font-weight:900;color:#087d65">
-      🌱 NUMBER GARDEN
-    </div>
-    <h2 style="color:#234c7a;margin:9px 0">MATHS LEARNING WORLD</h2>
-    <p style="color:#536b84;margin:0">
-      Learn • Practise • Explore • Achieve
-    </p>
-  </div>
-
-  <div class="home-options">
+   <div class="home-options">
 
     <!-- SPEED MATHS -->
     <article class="home-card speed-card">
