@@ -119,6 +119,138 @@ table{border-collapse:collapse;margin:12px auto;background:white}td,th{border:1p
   }
 }
 </style>
+
+
+/* Colourful Number Garden Home Page */
+.home-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  margin: 22px 0;
+}
+
+.home-card {
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 10px 26px rgba(29, 59, 96, 0.12);
+  transition: transform .2s, box-shadow .2s;
+}
+
+.home-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 30px rgba(29, 59, 96, 0.18);
+}
+
+.speed-card {
+  background: linear-gradient(145deg, #e0fff0, #b8f0db 55%, #e6fff7);
+  border: 2px solid #83d8b4;
+}
+
+.regular-card {
+  background: linear-gradient(145deg, #e7f0ff, #d9dcff 55%, #f4e9ff);
+  border: 2px solid #a8b9f4;
+}
+
+.home-art {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 185px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.speed-art {
+  background: linear-gradient(135deg, #168c72, #6cddac);
+}
+
+.regular-art {
+  background: linear-gradient(135deg, #456fd1, #9d86ed);
+}
+
+.home-art svg {
+  display: block;
+  width: min(100%, 280px);
+  height: 175px;
+}
+
+.home-card h2 {
+  font-size: clamp(23px, 2.5vw, 30px);
+  margin: 0 0 8px;
+}
+
+.speed-card h2 { color: #087653; }
+.regular-card h2 { color: #304ca7; }
+
+.home-card p {
+  line-height: 1.6;
+  margin: 8px 0 18px;
+  color: #34465d;
+}
+
+.home-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0 20px;
+}
+
+.home-feature {
+  background: rgba(255,255,255,.8);
+  border-radius: 30px;
+  padding: 8px 11px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #30445c;
+}
+
+.home-action {
+  width: 100%;
+  min-height: 48px;
+  border: 0;
+  border-radius: 13px;
+  color: white;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  padding: 13px;
+}
+
+.speed-action {
+  background: linear-gradient(90deg, #13845e, #20a876);
+}
+
+.regular-action {
+  background: linear-gradient(90deg, #315fc2, #7654ce);
+}
+
+.home-action:hover {
+  filter: brightness(1.06);
+}
+
+@media (max-width: 650px) {
+  .home-options {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .home-card {
+    padding: 18px;
+  }
+
+  .home-art {
+    min-height: 155px;
+  }
+
+  .home-art svg {
+    height: 150px;
+  }
+}
+
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body>
@@ -143,40 +275,104 @@ table{border-collapse:collapse;margin:12px auto;background:white}td,th{border:1p
   </div>
 </section>
 
-  
-<section id="speedHome" class="panel" style="display:none;background:#e8f6ff;border:2px solid #b8dcef;border-radius:20px;padding:20px">
-  <div style="text-align:center;padding:8px 0 18px;border-bottom:1px solid #b8dcef">
-    <h1 style="color:#16885e;margin:0;font-size:30px">🌱 Number Garden</h1>
-    <h2 style="color:#174a7e;margin:8px 0">⚡ SPEED MATHS</h2>
-    <p style="color:#365b7b;margin:8px 0;font-size:17px">Structured Mental Maths Practice</p>
-    <p style="color:#174a7e;margin:14px 0 0">Think Fast • Practise Daily • Shine Bright!</p>
-  </div>
+<section id="speedHome" class="panel" style="display:none;min-height:0;background:linear-gradient(135deg,#f4f8ff,#eefcf6);border:2px solid #d3e4f4;border-radius:24px;padding:22px">
 
-  <div style="display:flex;gap:16px;align-items:center;padding:20px 0">
-    <div style="font-size:65px;background:white;border-radius:16px;padding:12px">🚀</div>
-    <div>
-      <h2 style="color:#174a7e;margin:0 0 8px">Speed Maths</h2>
-      <h3 style="color:#16885e;margin:0 0 8px">Think Fast • Solve Smart!</h3>
-      <p style="color:#365b7b;margin:0">Quick maths challenges with a timer.</p>
+  <div style="text-align:center;padding:12px 8px 22px">
+    <div style="font-size:clamp(24px,4vw,34px);font-weight:900;color:#087d65">
+      🌱 NUMBER GARDEN
     </div>
+    <h2 style="color:#234c7a;margin:9px 0">MATHS LEARNING WORLD</h2>
+    <p style="color:#536b84;margin:0">
+      Learn • Practise • Explore • Achieve
+    </p>
   </div>
 
-  <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px">
-    <div style="background:white;border-radius:12px;padding:18px 5px;text-align:center;color:#174a7e">◷<br><b>5–15 Min</b></div>
-    <div style="background:white;border-radius:12px;padding:18px 5px;text-align:center;color:#174a7e">◎<br><b>Fun Tests</b></div>
-    <div style="background:white;border-radius:12px;padding:18px 5px;text-align:center;color:#174a7e">🏆<br><b>Earn Stars</b></div>
+  <div class="home-options">
+
+    <!-- SPEED MATHS -->
+    <article class="home-card speed-card">
+      <div class="home-art speed-art">
+        <svg viewBox="0 0 280 175" role="img"
+             aria-label="Rocket, numbers and stars for Speed Maths">
+          <circle cx="40" cy="34" r="17" fill="#fff3b0"/>
+          <circle cx="231" cy="39" r="7" fill="#ffffff"/>
+          <path d="M36 100 L55 81 M220 116 L239 97"
+                stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+          <g transform="translate(139 85) rotate(-38)">
+            <path d="M0 -58 C26 -40 30 -10 25 16 L-25 16 C-30 -10 -26 -40 0 -58Z"
+                  fill="#ffffff" stroke="#174d75" stroke-width="3"/>
+            <circle cx="0" cy="-20" r="11" fill="#69b8ff" stroke="#174d75" stroke-width="3"/>
+            <path d="M-25 0 L-43 20 L-25 25Z" fill="#ffca58"/>
+            <path d="M25 0 L43 20 L25 25Z" fill="#ffca58"/>
+            <path d="M-14 17 L0 43 L14 17Z" fill="#ff6e61"/>
+            <path d="M-8 24 L0 43 L8 24Z" fill="#ffe58a"/>
+          </g>
+          <text x="33" y="145" fill="#ffffff" font-size="25" font-weight="900">1 + 2</text>
+          <text x="201" y="150" fill="#ffffff" font-size="23" font-weight="900">★</text>
+        </svg>
+      </div>
+
+      <h2>⚡ Speed Maths</h2>
+      <p><b>Think Fast • Solve Smart!</b><br>
+        Improve mental maths with timed challenges and fun tests.
+      </p>
+
+      <div class="home-features">
+        <span class="home-feature">⏱️ 5–15 Min</span>
+        <span class="home-feature">🎯 Fun Tests</span>
+        <span class="home-feature">🏆 Earn Stars</span>
+      </div>
+
+      <button class="home-action speed-action" type="button"
+              onclick="openSpeedMaths()">
+        🚀 Let's Play Speed Maths!
+      </button>
+    </article>
+
+    <!-- REGULAR MATHS -->
+    <article class="home-card regular-card">
+      <div class="home-art regular-art">
+        <svg viewBox="0 0 280 175" role="img"
+             aria-label="Maths books, numbers and geometric shapes">
+          <circle cx="45" cy="35" r="17" fill="#fff0a9"/>
+          <text x="210" y="45" fill="#ffffff" font-size="30" font-weight="900">+</text>
+          <text x="34" y="89" fill="#ffffff" font-size="27" font-weight="900">123</text>
+          <g transform="translate(140 103)">
+            <path d="M-66 -35 Q-35 -47 0 -28 L0 38 Q-34 17 -66 30Z"
+                  fill="#fff8d9" stroke="#294d9d" stroke-width="3"/>
+            <path d="M0 -28 Q35 -47 66 -35 L66 30 Q34 17 0 38Z"
+                  fill="#ffffff" stroke="#294d9d" stroke-width="3"/>
+            <path d="M0 -28 L0 38" stroke="#294d9d" stroke-width="3"/>
+            <path d="M-50 -20 Q-27 -26 -10 -16 M-50 -5 Q-27 -11 -10 -1 M12 -16 Q33 -26 50 -20 M12 -1 Q33 -11 50 -5"
+                  stroke="#6c83d9" stroke-width="3" fill="none" stroke-linecap="round"/>
+          </g>
+          <rect x="206" y="105" width="28" height="28" rx="5"
+                fill="#ffd45e" stroke="#ffffff" stroke-width="2"/>
+          <circle cx="222" cy="75" r="12" fill="#ffb8d5"/>
+          <path d="M33 122 L49 94 L65 122Z" fill="#8de7cb" stroke="#ffffff" stroke-width="2"/>
+        </svg>
+      </div>
+
+      <h2>📚 Regular Maths</h2>
+      <p><b>Learn • Understand • Achieve!</b><br>
+        Explore class-wise chapters, picture-based lessons, examples and practice.
+      </p>
+
+      <div class="home-features">
+        <span class="home-feature">📖 Chapter Learning</span>
+        <span class="home-feature">🧩 Picture Activities</span>
+        <span class="home-feature">✏️ Practice & Tests</span>
+      </div>
+
+      <button class="home-action regular-action" type="button"
+              onclick="showRegularMathsChapters()">
+        📘 Explore Regular Maths →
+      </button>
+    </article>
+
   </div>
-
-  <button class="btn primary" type="button" style="width:100%;background:#19885f" onclick="openSpeedMaths()">▶ Let's Play Speed Maths!</button>
-
-  
-<button class="btn primary" type="button"
-  style="width:100%;margin-top:10px;background:#2878bd;color:#ffffff;border:2px solid #1e6099;font-weight:700"
-  onclick="showRegularMathsChapters()">
-  📚 Explore Regular Maths Chapters →
-</button>
-
 </section>
+
 
 <section id="chapterBrowser" class="panel" style="display:none;min-height:0"><div class="chapter-head"><div><h2>📚 Choose Your Chapter</h2><p class="hint">All chapters are shown. Open the chapters unlocked by your teacher.</p></div><span class="pill" id="chapterClassLabel">CLASS 1</span></div><div id="chapterMessage" class="hint" role="status"></div><div id="chapterList" class="chapter-grid"></div>
 <div class="lesson" style="text-align:left;margin-top:18px;border:2px solid #2878bd">
