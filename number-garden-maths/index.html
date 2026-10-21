@@ -758,6 +758,139 @@ body:has(#loginGate:not([style*="display:none"])) {
   }
 }
 
+
+/* Speed Maths: Set-wise level layout */
+.speed-level-sets {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.speed-level-set {
+  padding: 16px;
+  border-radius: 18px;
+  border: 1px solid #dbe5f0;
+}
+
+.speed-level-set.set-color-0 {
+  background: #e5f8ef;
+  border-color: #b8e8cf;
+}
+
+.speed-level-set.set-color-1 {
+  background: #e9edff;
+  border-color: #c8d2ff;
+}
+
+.speed-level-set.set-color-2 {
+  background: #fff3d8;
+  border-color: #f2d9a0;
+}
+
+.speed-level-set.set-color-3 {
+  background: #f8e8f8;
+  border-color: #e9c8e9;
+}
+
+.speed-set-heading {
+  margin: 0 0 12px;
+  font-size: 20px;
+  color: #173d69;
+}
+
+.speed-set-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.speed-level-card {
+  width: 100%;
+  min-width: 0;
+  min-height: 100px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  border-radius: 12px;
+  border: 1px solid #d5dfec;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.speed-level-card.unlocked {
+  border: 1.5px solid #16a36a;
+  background: #ffffff;
+}
+
+.speed-level-card.locked {
+  background: #f5f7fa;
+  color: #8794a7;
+  cursor: not-allowed;
+}
+
+.speed-level-card .chapter-no {
+  display: none;
+}
+
+.speed-level-card .chapter-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.speed-level-card .chapter-info b {
+  font-size: 16px;
+}
+
+.speed-level-card .chapter-info small {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.speed-level-card .chapter-status {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+@media (max-width: 600px) {
+  .speed-level-set {
+    padding: 10px;
+  }
+
+  .speed-set-heading {
+    font-size: 17px;
+  }
+
+  .speed-set-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .speed-level-card {
+    min-height: 94px;
+    padding: 7px 3px;
+    gap: 5px;
+  }
+
+  .speed-level-card .chapter-info b {
+    font-size: 13px;
+  }
+
+  .speed-level-card .chapter-info small {
+    font-size: 10px;
+  }
+
+  .speed-level-card .chapter-status {
+    font-size: 10px;
+  }
+}
+
   
 </style>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -2126,9 +2259,27 @@ async function refreshSpeedLevels() {
 }
 
 
+
 function renderSpeedLevels() {
   const panel = speedPanel();
   const levels = Array.isArray(speedSettings) ? speedSettings : [];
+
+  const groupedLevels = [];
+  const groupMap = {};
+
+  levels.forEach((level, index) => {
+    const topic = String(level.topic || 'Other').trim();
+
+    if (!groupMap[topic]) {
+      groupMap[topic] = [];
+      groupedLevels.push({
+        topic: topic,
+        levels: groupMap[topic]
+      });
+    }
+
+    groupMap[topic].push({ level: level, index: index });
+  });
 
   panel.innerHTML =
     '<div class="chapter-head">' +
@@ -2140,33 +2291,54 @@ function renderSpeedLevels() {
     '</div>' +
 
     (levels.length
-      ? '<div class="chapter-grid">' +
-        levels.map((l, i) => {
-          const unlocked = l.unlocked === true;
+      ? '<div class="speed-level-sets">' +
+        groupedLevels.map((group, groupIndex) => {
+          return '<section class="speed-level-set set-color-' +
+            (groupIndex % 4) + '">' +
 
-          return '<button class="chapter-card ' +
-            (unlocked ? 'unlocked' : 'locked') +
-            '" type="button" ' +
-            (unlocked ? 'onclick="startSpeedLevel(' + i + ')"' : 'disabled') +
-            '>' +
-              '<span class="chapter-no">' +
-                escapeHtml(l.levelId || '') +
-              '</span>' +
-              '<span class="chapter-info"><b>' +
-                escapeHtml(l.levelName || '') +
-              '</b><small>' +
-                escapeHtml(l.topic || '') + ' · ' +
-                Number(l.timeLimitMinutes || 0) + ' min · ' +
-                Number(l.totalQuestions || 0) + ' questions' +
-              '</small></span>' +
-              '<span class="chapter-status">' +
-                (unlocked ? '🔓 OPEN' : '🔒 LOCKED') +
-              '</span>' +
-          '</button>';
+            '<h3 class="speed-set-heading">' +
+              '➕ ' + escapeHtml(group.topic) +
+            '</h3>' +
+
+            '<div class="speed-set-grid">' +
+              group.levels.map(item => {
+                const l = item.level;
+                const i = item.index;
+                const unlocked = l.unlocked === true;
+
+                return '<button class="chapter-card speed-level-card ' +
+                  (unlocked ? 'unlocked' : 'locked') +
+                  '" type="button" ' +
+                  (unlocked
+                    ? 'onclick="startSpeedLevel(' + i + ')"'
+                    : 'disabled') +
+                  '>' +
+
+                    '<span class="chapter-no">' +
+                      escapeHtml(l.levelId || '') +
+                    '</span>' +
+
+                    '<span class="chapter-info">' +
+                      '<b>' + escapeHtml(l.levelName || '') + '</b>' +
+                      '<small>' +
+                        Number(l.timeLimitMinutes || 0) + ' min · ' +
+                        Number(l.totalQuestions || 0) + ' questions' +
+                      '</small>' +
+                    '</span>' +
+
+                    '<span class="chapter-status">' +
+                      (unlocked ? '🔓 OPEN' : '🔒 LOCKED') +
+                    '</span>' +
+
+                '</button>';
+              }).join('') +
+            '</div>' +
+          '</section>';
         }).join('') +
-        '</div>'
+      '</div>'
       : '<div class="lesson"><p>No Speed Maths levels are available for this class.</p></div>');
 }
+
 
   
 async function startSpeedLevel(index){
