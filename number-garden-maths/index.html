@@ -693,15 +693,11 @@ body {
 }
 
 
+
 /* Full-screen school photo on the login page */
-body:has(#loginGate[style*="display:block"]) {
+body:has(#loginGate:not([style*="display:none"])) {
   background-color: #eaf6ff !important;
-  background-image:
-    linear-gradient(
-      rgba(255, 255, 255, 0.12),
-      rgba(255, 255, 255, 0.12)
-    ),
-    url("./School%20Building.jpg") !important;
+  background-image: url("./School%20Building.jpg") !important;
   background-position: center center !important;
   background-repeat: no-repeat !important;
   background-size: cover !important;
@@ -719,11 +715,12 @@ body:has(#loginGate[style*="display:block"]) {
 }
 
 @media (max-width: 650px) {
-  body:has(#loginGate[style*="display:block"]) {
+  body:has(#loginGate:not([style*="display:none"])) {
     background-attachment: scroll !important;
     background-position: center center !important;
   }
 }
+
 
   
 </style>
