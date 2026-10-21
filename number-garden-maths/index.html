@@ -692,23 +692,39 @@ body {
   background: rgba(255, 255, 255, 0.92) !important;
 }
 
-/* School photo background - Login page only */
-#loginGate {
-  background:
+
+/* Full-screen school photo on the login page */
+body:has(#loginGate[style*="display:block"]) {
+  background-color: #eaf6ff !important;
+  background-image:
     linear-gradient(
-      rgba(255, 255, 255, 0.72),
-      rgba(255, 255, 255, 0.72)
+      rgba(255, 255, 255, 0.12),
+      rgba(255, 255, 255, 0.12)
     ),
-    url("./School%20Building.jpg") center center / cover no-repeat !important;
+    url("./School%20Building.jpg") !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+  background-attachment: fixed !important;
 }
 
-/* Keep login box design unchanged */
+/* Keep the login box clear and readable */
 #loginGate {
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  border: 2px solid #dce8f2 !important;
   border-radius: 20px !important;
-  box-shadow: 0 8px 24px rgba(23, 61, 105, 0.15) !important;
-  position: relative;
-  z-index: 1;
+  box-shadow: 0 8px 24px rgba(23, 61, 105, 0.18) !important;
 }
+
+@media (max-width: 650px) {
+  body:has(#loginGate[style*="display:block"]) {
+    background-attachment: scroll !important;
+    background-position: center center !important;
+  }
+}
+
   
 </style>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
