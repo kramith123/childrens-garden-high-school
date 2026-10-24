@@ -44,6 +44,59 @@
 </div>
 
 <div class="tablewrap"><table><thead><tr><th>Student</th><th>Class</th><th>Login ID</th><th>Practice</th><th>Test</th><th>Correct</th><th>Wrong</th><th>Accuracy</th><th>Marks</th></tr></thead><tbody id="studentRows"></tbody></table></div></section>
+<section class="panel" id="examDetailedReport">
+  <div class="sectionhead">
+    <h2>📝 Exam Attempts Detailed Report</h2>
+    <span class="muted" id="examReportCount">Detailed Reports</span>
+  </div>
+
+  <div class="filters">
+    <label>
+      Report Type
+      <select id="examReportType">
+        <option value="all">All Students</option>
+        <option value="attempted">Exam Attempted Students</option>
+        <option value="notAttempted">Exam Not Attempted Students</option>
+      </select>
+    </label>
+
+    <label>
+      Report Scope
+      <select id="examReportScope">
+        <option value="class">Class-wise</option>
+        <option value="individual">Individual Student</option>
+      </select>
+    </label>
+
+    <button type="button" id="generateExamReportBtn">Generate Report</button>
+    <button type="button" id="printExamReportBtn">Print / Save PDF</button>
+    <button type="button" id="downloadExamCsvBtn">Download Excel / CSV</button>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Student Name</th>
+          <th>Class</th>
+          <th>Login ID</th>
+          <th>Exam Date</th>
+          <th>Chapter</th>
+          <th>Topic</th>
+          <th>Attempt No.</th>
+          <th>Correct</th>
+          <th>Wrong</th>
+          <th>Marks</th>
+        </tr>
+      </thead>
+      <tbody id="examDetailedReportRows">
+        <tr>
+          <td colspan="10">Click Generate Report to view details.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
 <section class="panel"><div class="sectionhead"><h2>⚠️ Frequently Wrong Questions</h2><span class="muted">Based on saved question attempts</span></div><div class="tablewrap"><table><thead><tr><th>Class</th><th>Chapter</th><th>Question</th><th>Attempts</th><th>Wrong</th><th>Correct</th></tr></thead><tbody id="weakRows"></tbody></table></div></section>
 <section class="panel"><div class="sectionhead"><h2>📝 Recent Question Attempts</h2><span class="muted">Latest saved records</span></div><div class="tablewrap"><table><thead><tr><th>Date</th><th>Student</th><th>Class</th><th>Section</th><th>Chapter</th><th>Question</th><th>Student Answer</th><th>Correct Answer</th><th>Result</th><th>Attempt</th></tr></thead><tbody id="attemptRows"></tbody></table></div></section>
 <section class="panel"><h2>📚 Chapter Activity</h2><div class="tablewrap"><table><thead><tr><th>Date</th><th>Student</th><th>Class</th><th>Activity</th><th>Type</th><th>Completed</th><th>Score</th><th>Duration</th></tr></thead><tbody id="activityRows"></tbody></table></div></section>
@@ -276,4 +329,314 @@ $('reportPeriod').addEventListener('change',()=>{setReportDates();try{updateComp
   try{updateComparison(currentReport())}catch(e){}
 });$('classFilter').addEventListener('change',()=>{updateStudentFilter();renderDashboard();$('reportScope').textContent=$('classFilter').value==='all'?'All classes': 'Class '+$('classFilter').value;try{updateComparison(currentReport())}catch(e){}});$('studentFilter').addEventListener('change',()=>{renderDashboard();$('reportScope').textContent=$('studentFilter').value==='all'?'Current class filter':'Individual student: '+$('studentFilter').selectedOptions[0].text;try{updateComparison(currentReport())}catch(e){}});$('searchFilter').addEventListener('input',()=>{renderDashboard();try{updateComparison(currentReport())}catch(e){}});
 $('loginBtn').addEventListener('click',()=>{savedPin=$('teacherPin').value.trim();if(!savedPin){$('loginError').textContent='Please enter the Teacher Dashboard PIN.';return}loadDashboard()});$('teacherPin').addEventListener('keydown',e=>{if(e.key==='Enter')$('loginBtn').click()});$('refreshBtn').addEventListener('click',loadDashboard);setReportDates();
+  // ===== EXAM ATTEMPTS DETAILED REPORT =====
+
+function getExamReportRows() {
+  if (!dashboardData) return [];
+
+  const allStudents = dashboardData.students || [];
+  const allAttempts = dashboardData.reportAttempts || [];
+  const mathsResults = dashboardData.reportMaths || [];
+
+  const selectedClass = $('classFilter').value;
+  const selectedSection = $('sectionFilter').value;
+  const selectedStudent = $('studentFilter').value;
+  const searchText = $('searchFilter').value.trim().toLowerCase();
+
+  const reportType = $('examReportType').value;
+  const reportScope = $('examReportScope').value;
+
+  let students = allStudents.filter(s =>
+    (selectedClass === 'all' ||
+      String(s.className) === selectedClass) &&
+    (selectedSection === 'all' ||
+      String(s.section || '').toUpperCase() === selectedSection) &&
+    (!searchText ||
+      (String(s.studentName || '') + ' ' +
+       String(s.loginId || '') + ' ' +
+       String(s.rollNo || '')).toLowerCase().includes(searchText))
+  );
+
+  if (reportScope === 'individual') {
+    if (selectedStudent === 'all') {
+      $('examReportCount').textContent =
+        'Please select an individual student in the Student filter above.';
+      return [];
+    }
+
+    students = students.filter(s =>
+      String(s.loginId) === String(selectedStudent)
+    );
+  }
+
+  const studentIds = new Set(students.map(s => String(s.loginId)));
+
+  // Only question attempts marked as Test are treated as exam attempts.
+  const testAttempts = allAttempts.filter(a =>
+    studentIds.has(String(a.loginId)) &&
+    String(a.section || '').toLowerCase() === 'test'
+  );
+
+  // Group question-level records into individual test attempts.
+  const groups = new Map();
+
+  testAttempts.forEach(a => {
+    const key = [
+      a.loginId,
+      a.resultId || '',
+      a.dateKey || a.date || '',
+      a.chapterNo || '',
+      a.attemptNo || ''
+    ].join('|');
+
+    if (!groups.has(key)) {
+      groups.set(key, {
+        loginId: String(a.loginId),
+        studentName: a.studentName || '',
+        className: a.className || '',
+        date: a.date || a.dateKey || '',
+        dateKey: a.dateKey || '',
+        chapter: a.chapterNo || '',
+        attemptNo: a.attemptNo || '',
+        resultId: a.resultId || '',
+        correct: 0,
+        wrong: 0
+      });
+    }
+
+    const row = groups.get(key);
+    const result = String(a.result || '').toLowerCase();
+
+    if (result === 'correct') row.correct++;
+    else if (result === 'wrong') row.wrong++;
+  });
+
+  const examRows = [];
+
+  groups.forEach(g => {
+    const student = students.find(s =>
+      String(s.loginId) === g.loginId
+    );
+
+    if (!student) return;
+
+    const maths = mathsResults.find(m =>
+      String(m.loginId) === g.loginId &&
+      g.resultId &&
+      String(m.resultId || '') === String(g.resultId)
+    );
+
+    examRows.push({
+      studentName: student.studentName || g.studentName,
+      className: student.className || g.className,
+      loginId: g.loginId,
+      date: g.date,
+      chapter: g.chapter,
+      topic: maths ? (maths.topic || '') : '',
+      attemptNo: g.attemptNo,
+      correct: g.correct,
+      wrong: g.wrong,
+      marks: maths ? (maths.marks ?? '') : '',
+      attempted: true
+    });
+  });
+
+  const attemptedIds = new Set(examRows.map(r => r.loginId));
+
+  let rows = [];
+
+  if (reportType === 'attempted') {
+    rows = examRows;
+  } else if (reportType === 'notAttempted') {
+    rows = students
+      .filter(s => !attemptedIds.has(String(s.loginId)))
+      .map(s => ({
+        studentName: s.studentName || '',
+        className: s.className || '',
+        loginId: s.loginId || '',
+        date: '',
+        chapter: '',
+        topic: '',
+        attemptNo: '',
+        correct: '',
+        wrong: '',
+        marks: '',
+        attempted: false
+      }));
+  } else {
+    rows = [...examRows];
+
+    students.forEach(s => {
+      if (!attemptedIds.has(String(s.loginId))) {
+        rows.push({
+          studentName: s.studentName || '',
+          className: s.className || '',
+          loginId: s.loginId || '',
+          date: '',
+          chapter: '',
+          topic: '',
+          attemptNo: '',
+          correct: '',
+          wrong: '',
+          marks: '',
+          attempted: false
+        });
+      }
+    });
+  }
+
+  return rows.sort((a, b) =>
+    String(a.className).localeCompare(String(b.className),
+      undefined, { numeric: true }) ||
+    String(a.studentName).localeCompare(String(b.studentName))
+  );
+}
+
+function generateExamReport() {
+  try {
+    const rows = getExamReportRows();
+
+    $('examDetailedReportRows').innerHTML = rows.length
+      ? rows.map(r => `
+        <tr>
+          <td>${esc(r.studentName)}</td>
+          <td>${esc(r.className)}</td>
+          <td>${esc(r.loginId)}</td>
+          <td>${esc(r.date)}</td>
+          <td>${esc(r.chapter)}</td>
+          <td>${esc(r.topic)}</td>
+          <td>${esc(r.attemptNo)}</td>
+          <td>${esc(r.correct)}</td>
+          <td>${esc(r.wrong)}</td>
+          <td>${esc(r.marks)}</td>
+        </tr>
+      `).join('')
+      : '<tr><td colspan="10" class="empty">No matching exam records found.</td></tr>';
+
+    $('examReportCount').textContent =
+      rows.length + ' record(s)';
+
+  } catch (error) {
+    $('examDetailedReportRows').innerHTML =
+      '<tr><td colspan="10" class="empty">Unable to generate report.</td></tr>';
+
+    $('examReportCount').textContent = error.message;
+  }
+}
+
+function printExamReport() {
+  const rows = getExamReportRows();
+
+  if (!rows.length) {
+    alert('No records available to print.');
+    return;
+  }
+
+  const tableRows = rows.map(r => `
+    <tr>
+      <td>${esc(r.studentName)}</td>
+      <td>${esc(r.className)}</td>
+      <td>${esc(r.loginId)}</td>
+      <td>${esc(r.date)}</td>
+      <td>${esc(r.chapter)}</td>
+      <td>${esc(r.topic)}</td>
+      <td>${esc(r.attemptNo)}</td>
+      <td>${esc(r.correct)}</td>
+      <td>${esc(r.wrong)}</td>
+      <td>${esc(r.marks)}</td>
+    </tr>
+  `).join('');
+
+  const win = window.open('', '_blank');
+
+  if (!win) {
+    alert('Please allow pop-ups to print or save as PDF.');
+    return;
+  }
+
+  win.document.write(`
+    <!doctype html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>Exam Attempts Detailed Report</title>
+      <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        h1, h2 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #999; padding: 6px; font-size: 10px; }
+        th { background: #edf3f8; }
+        @media print {
+          body { padding: 0; }
+          tr { page-break-inside: avoid; }
+        }
+      </style>
+    </head>
+    <body>
+      <h1>CHILDREN’S GARDEN E.M HIGH SCHOOL</h1>
+      <h2>Exam Attempts Detailed Report</h2>
+      <p>Generated: ${esc(new Date().toLocaleString())}</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Student Name</th><th>Class</th><th>Login ID</th>
+            <th>Exam Date</th><th>Chapter</th><th>Topic</th>
+            <th>Attempt No.</th><th>Correct</th><th>Wrong</th><th>Marks</th>
+          </tr>
+        </thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+    </body>
+    </html>
+  `);
+
+  win.document.close();
+  win.focus();
+  setTimeout(() => win.print(), 500);
+}
+
+function downloadExamCsv() {
+  const rows = getExamReportRows();
+
+  if (!rows.length) {
+    alert('No records available to download.');
+    return;
+  }
+
+  const headers = [
+    'Student Name', 'Class', 'Login ID', 'Exam Date',
+    'Chapter', 'Topic', 'Attempt No.', 'Correct', 'Wrong', 'Marks'
+  ];
+
+  const csvEscape = value =>
+    '"' + String(value ?? '').replace(/"/g, '""') + '"';
+
+  const csv = [
+    headers,
+    ...rows.map(r => [
+      r.studentName, r.className, r.loginId, r.date,
+      r.chapter, r.topic, r.attemptNo, r.correct, r.wrong, r.marks
+    ])
+  ].map(row => row.map(csvEscape).join(',')).join('\r\n');
+
+  const blob = new Blob(['\uFEFF' + csv], {
+    type: 'text/csv;charset=utf-8;'
+  });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+
+  link.href = url;
+  link.download = 'Number_Garden_Exam_Detailed_Report.csv';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// Connect the three new report buttons.
+$('generateExamReportBtn').addEventListener('click', generateExamReport);
+$('printExamReportBtn').addEventListener('click', printExamReport);
+$('downloadExamCsvBtn').addEventListener('click', downloadExamCsv);
 </script></body></html>
