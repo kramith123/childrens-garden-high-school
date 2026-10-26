@@ -2426,10 +2426,17 @@ const data = await speedApiCall({
     currentStudent.studentId ||
     currentStudent.admissionNo ||
     ''
-  )
+  ),
+  questionIds: JSON.stringify(requestedQuestionIds)
 });
 
 speedQuestions = Array.isArray(data.questions) ? data.questions : [];
+if (speedQuestions.length) {
+  localStorage.setItem(
+    'ng_speed_question_ids',
+    JSON.stringify(speedQuestions.map(q => String(q.questionId)))
+  );
+}
 
 if (!speedQuestions.length) {
   throw new Error('No active questions are available for this level.');
@@ -2630,6 +2637,7 @@ function cancelSpeedTest(){
   localStorage.removeItem('ng_speed_answers');
   localStorage.removeItem('ng_speed_time');
   localStorage.removeItem('ng_speed_exam_active');
+localStorage.removeItem('ng_speed_question_ids');
 
   speedAnswers = {};
   speedSecondsLeft = 0;
@@ -2664,6 +2672,7 @@ const elapsed = Math.max(
   className: String(currentStudent.className),
   levelId: String(speedLevel.levelId),
   topicId: String(speedLevel.topicId || ''),
+  questionIds: JSON.stringify(speedQuestions.map(q => String(q.questionId))),
   answers: JSON.stringify(speedAnswers),
   timeTakenSeconds: String(
     Math.min(
@@ -2677,6 +2686,7 @@ localStorage.removeItem('ng_speed_level');
 localStorage.removeItem('ng_speed_answers');
 localStorage.removeItem('ng_speed_time');
 localStorage.removeItem('ng_speed_exam_active');
+localStorage.removeItem('ng_speed_question_ids');
     panel.innerHTML='<h2>🏆 Speed Maths Completed!</h2><div class="lesson"><div class="sum">'+Number(result.score)+' / '+Number(result.totalMarks)+'</div><p><b>Correct:</b> '+result.correct+' · <b>Wrong:</b> '+result.wrong+' · <b>Unanswered:</b> '+result.unanswered+'</p><p><b>Accuracy:</b> '+result.accuracyPercent+'%</p><p><b>Time Taken:</b> '+formatSpeedTime(result.timeTakenSeconds)+'</p><p><b>Status:</b> '+(result.passed?'Passed':'Keep Practising')+'</p><p class="hint">Result saved to Speed_Results and Speed_Tracking.</p>'+(autoFinished?'<p class="hint">The time limit ended, so the test was submitted automatically.</p>':'')+'</div><div class="actions"><button class="btn primary" onclick="refreshSpeedLevels()">Try Another Level</button><button class="btn secondary" onclick="backToChapters()">Back to Chapters</button></div>';
 
 
