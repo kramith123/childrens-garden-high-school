@@ -2413,7 +2413,23 @@ async function startSpeedLevel(index){
 
   panel.innerHTML='<h2>Loading questions...</h2><p class="hint">Please wait.</p>';
   try{
-    
+    // Reuse the saved question IDs only when restoring the same unfinished test.
+    // Otherwise, send an empty list so the server selects a fresh random set.
+    let requestedQuestionIds = [];
+    try {
+      const savedLevelForQuestions = JSON.parse(localStorage.getItem('ng_speed_level') || 'null');
+      const savedExamActive = localStorage.getItem('ng_speed_exam_active') === 'true';
+      const savedTimeForQuestions = localStorage.getItem('ng_speed_time');
+      const sameSavedLevel = savedLevelForQuestions &&
+        String(savedLevelForQuestions.levelId) === String(speedLevel.levelId) &&
+        String(savedLevelForQuestions.topicId || '') === String(speedLevel.topicId || '');
+      if (savedExamActive && sameSavedLevel && savedTimeForQuestions !== null) {
+        requestedQuestionIds = JSON.parse(localStorage.getItem('ng_speed_question_ids') || '[]');
+        if (!Array.isArray(requestedQuestionIds)) requestedQuestionIds = [];
+      }
+    } catch (restoreIdsError) {
+      requestedQuestionIds = [];
+    }
 
 const data = await speedApiCall({
   action: 'getSpeedQuestions',
